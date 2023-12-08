@@ -130,8 +130,8 @@ static void virtio_net_pci_instance_init(Object *obj)
 static void virtio_net_pci_vf_qdev_reset_hold(Object *obj)
 {
     PCIDevice *vf = PCI_DEVICE(obj);
-
-    igb_vf_reset(pcie_sriov_get_pf(vf), pcie_sriov_vf_number(vf));
+    return 0;
+    //igb_vf_reset(pcie_sriov_get_pf(vf), pcie_sriov_vf_number(vf));
 }
 
 static void virtio_net_pci_vf_pci_uninit(PCIDevice *dev)
