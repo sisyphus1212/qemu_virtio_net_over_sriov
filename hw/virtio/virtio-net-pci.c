@@ -158,9 +158,9 @@ static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned 
 {
     PCIDevice *vf = PCI_DEVICE(opaque);
     PCIDevice *pf = pcie_sriov_get_pf(vf);
-
-    addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), false);
-    return addr == HWADDR_MAX ? 0 : igb_mmio_read(pf, addr, size);
+    return virtio_pci_device_read(opaque, addr, val, size);
+    //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), false);
+    //return addr == HWADDR_MAX ? 0 : igb_mmio_read(pf, addr, size);
 }
 
 static void virtio_net_pci_vf_mmio_write(void *opaque, hwaddr addr, uint64_t val,
@@ -168,11 +168,11 @@ static void virtio_net_pci_vf_mmio_write(void *opaque, hwaddr addr, uint64_t val
 {
     PCIDevice *vf = PCI_DEVICE(opaque);
     PCIDevice *pf = pcie_sriov_get_pf(vf);
-
-    addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), true);
-    if (addr != HWADDR_MAX) {
-        virtio_pci_device_write(pf, addr, val, size);
-    }
+    return virtio_pci_device_write(opaque, addr, val, size);
+    //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), true);
+    //if (addr != HWADDR_MAX) {
+    //    virtio_pci_device_write(pf, addr, val, size);
+    //}
 }
 
 static const MemoryRegionOps mmio_ops = {
