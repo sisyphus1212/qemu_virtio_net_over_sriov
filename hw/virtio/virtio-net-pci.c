@@ -23,9 +23,11 @@
 #include "qapi/error.h"
 #include "qemu/module.h"
 #include "qom/object.h"
+#include "hw/pci/msi.h"
+#include "hw/pci/msix.h"
 
 typedef struct VirtIONetPCI VirtIONetPCI;
-typedef struct VirtIONetVfPCI VirtIONetVfPCI;
+//typedef struct VirtIONetVfPCI VirtIONetVfPCI;
 /*
  * virtio-net-pci: This extends VirtioPCIProxy.
  */
@@ -34,9 +36,10 @@ DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI,
                          TYPE_VIRTIO_NET_PCI)
 
 #define TYPE_VIRTIO_NET_PCI_VF "virtio-net-pci-vf-base"
-DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI,
-                         TYPE_VIRTIO_NET_PCI)
+DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI_VF,
+                         TYPE_VIRTIO_NET_PCI_VF)
 
+#define TYPE_VIRTIONETVF "virtio-net-vf"
 OBJECT_DECLARE_SIMPLE_TYPE(VirtIONetVfPCI, VIRTIONETVF)
 
 struct VirtIONetPCI {
@@ -62,7 +65,7 @@ static Property virtio_net_properties[] = {
 #define VIRTIO_NET_VF_MMIO_SIZE      (16 * 1024)
 #define VIRTIO_NET_VF_MSIX_SIZE      (16 * 1024)
 #define VIRTIO_NET_CAP_SRIOV_OFFSET  (0x160)
-#define VIRTIO_NET_CAP_ARI_OFFSET    (0x150)
+#define VIRTIO_NET_CAP_ARI_OFFSET    (0x100)
 #define VIRTIO_NET_VF_DEV_ID         (0x1041)
 #define VIRTIO_NET_VF_OFFSET         (0x80)
 #define VIRTIO_NET_VF_STRIDE         (2)
@@ -86,7 +89,7 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     PCIDevice *pci_dev = &vpci_dev->pci_dev;
     pcie_ari_init(pci_dev, VIRTIO_NET_CAP_ARI_OFFSET);
 
-    pcie_sriov_pf_init(pci_dev, VIRTIO_NET_CAP_SRIOV_OFFSET, TYPE_VIRTIO_NET_PCI,
+    pcie_sriov_pf_init(pci_dev, VIRTIO_NET_CAP_SRIOV_OFFSET, TYPE_VIRTIO_NET_PCI_VF,
         VIRTIO_NET_VF_DEV_ID, 8, 8,
         VIRTIO_NET_VF_OFFSET, VIRTIO_NET_VF_STRIDE);
 
@@ -129,8 +132,7 @@ static void virtio_net_pci_instance_init(Object *obj)
 
 static void virtio_net_pci_vf_qdev_reset_hold(Object *obj)
 {
-    PCIDevice *vf = PCI_DEVICE(obj);
-    return 0;
+    //PCIDevice *vf = PCI_DEVICE(obj);
     //igb_vf_reset(pcie_sriov_get_pf(vf), pcie_sriov_vf_number(vf));
 }
 
@@ -154,11 +156,61 @@ static void virtio_net_pci_vf_write_config(PCIDevice *dev, uint32_t addr, uint32
     }
 }
 
+static uint64_t virtio_pci_device_read(void *opaque, hwaddr addr,
+                                       unsigned size)
+{
+    VirtIOPCIProxy *proxy = opaque;
+    VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
+    uint64_t val;
+
+    if (vdev == NULL) {
+        return UINT64_MAX;
+    }
+
+    switch (size) {
+    case 1:
+        val = virtio_config_modern_readb(vdev, addr);
+        break;
+    case 2:
+        val = virtio_config_modern_readw(vdev, addr);
+        break;
+    case 4:
+        val = virtio_config_modern_readl(vdev, addr);
+        break;
+    default:
+        val = 0;
+        break;
+    }
+    return val;
+}
+
+static void virtio_pci_device_write(void *opaque, hwaddr addr,
+                                    uint64_t val, unsigned size)
+{
+    VirtIOPCIProxy *proxy = opaque;
+    VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
+
+    if (vdev == NULL) {
+        return;
+    }
+
+    switch (size) {
+    case 1:
+        virtio_config_modern_writeb(vdev, addr, val);
+        break;
+    case 2:
+        virtio_config_modern_writew(vdev, addr, val);
+        break;
+    case 4:
+        virtio_config_modern_writel(vdev, addr, val);
+        break;
+    }
+}
 static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned size)
 {
-    PCIDevice *vf = PCI_DEVICE(opaque);
-    PCIDevice *pf = pcie_sriov_get_pf(vf);
-    return virtio_pci_device_read(opaque, addr, val, size);
+    //PCIDevice *vf = PCI_DEVICE(opaque);
+    //PCIDevice *pf = pcie_sriov_get_pf(vf);
+    return virtio_pci_device_read(opaque, addr, size);
     //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), false);
     //return addr == HWADDR_MAX ? 0 : igb_mmio_read(pf, addr, size);
 }
@@ -166,8 +218,8 @@ static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned 
 static void virtio_net_pci_vf_mmio_write(void *opaque, hwaddr addr, uint64_t val,
     unsigned size)
 {
-    PCIDevice *vf = PCI_DEVICE(opaque);
-    PCIDevice *pf = pcie_sriov_get_pf(vf);
+    //PCIDevice *vf = PCI_DEVICE(opaque);
+    //PCIDevice *pf = pcie_sriov_get_pf(vf);
     return virtio_pci_device_write(opaque, addr, val, size);
     //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), true);
     //if (addr != HWADDR_MAX) {
@@ -216,7 +268,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     }
 
     if (pcie_endpoint_cap_init(dev, 0xa0) < 0) {
-        hw_error("Failed to initialize PCIe capability");
+        herror("Failed to initialize PCIe capability");
     }
 
     if (object_property_get_bool(OBJECT(pcie_sriov_get_pf(dev)),
@@ -225,7 +277,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     }
 
     if (pcie_aer_init(dev, 1, 0x100, 0x40, errp) < 0) {
-        hw_error("Failed to initialize AER capability");
+        herror("Failed to initialize AER capability");
     }
 
     pcie_ari_init(dev, 0x150);
