@@ -367,6 +367,8 @@ typedef struct VirtIORNGConf VirtIORNGConf;
                       VIRTIO_F_IOMMU_PLATFORM, false), \
     DEFINE_PROP_BIT64("packed", _state, _field, \
                       VIRTIO_F_RING_PACKED, false), \
+    DEFINE_PROP_BIT64("sriov", _state, _field, \
+                      VIRTIO_F_SR_IOV, true), \
     DEFINE_PROP_BIT64("queue_reset", _state, _field, \
                       VIRTIO_F_RING_RESET, true)
 

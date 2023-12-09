@@ -791,6 +791,7 @@ static uint64_t virtio_net_get_features(VirtIODevice *vdev, uint64_t features,
     features |= n->host_features;
 
     virtio_add_feature(&features, VIRTIO_NET_F_MAC);
+    virtio_add_feature(&features, VIRTIO_F_SR_IOV);
 
     if (!peer_has_vnet_hdr(n)) {
         virtio_clear_feature(&features, VIRTIO_NET_F_CSUM);
