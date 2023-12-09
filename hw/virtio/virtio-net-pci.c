@@ -35,12 +35,16 @@ typedef struct VirtIONetPCI VirtIONetPCI;
 DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI,
                          TYPE_VIRTIO_NET_PCI)
 
-#define TYPE_VIRTIO_NET_PCI_VF "virtio-net-pci-vf-base"
-DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI_VF,
-                         TYPE_VIRTIO_NET_PCI_VF)
+//#define TYPE_VIRTIONETVF "virtio-net-pci-vf-base"
+//DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI_VF,
+//                         TYPE_VIRTIONETVF)
+
+//#define TYPE_VIRTIONETVF "virtio-net-vf"
+//OBJECT_DECLARE_SIMPLE_TYPE(VirtIONetVfPCI, VIRTIONETVF)
 
 #define TYPE_VIRTIONETVF "virtio-net-vf"
 OBJECT_DECLARE_SIMPLE_TYPE(VirtIONetVfPCI, VIRTIONETVF)
+#define VIRTIONETVF(obj) OBJECT_CHECK(VirtIONetVfPCI, (obj), TYPE_VIRTIONETVF)
 
 struct VirtIONetPCI {
     VirtIOPCIProxy parent_obj;
@@ -89,7 +93,7 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     PCIDevice *pci_dev = &vpci_dev->pci_dev;
     pcie_ari_init(pci_dev, VIRTIO_NET_CAP_ARI_OFFSET);
 
-    pcie_sriov_pf_init(pci_dev, VIRTIO_NET_CAP_SRIOV_OFFSET, TYPE_VIRTIO_NET_PCI_VF,
+    pcie_sriov_pf_init(pci_dev, VIRTIO_NET_CAP_SRIOV_OFFSET, TYPE_VIRTIONETVF,
         VIRTIO_NET_VF_DEV_ID, 8, 8,
         VIRTIO_NET_VF_OFFSET, VIRTIO_NET_VF_STRIDE);
 
@@ -244,9 +248,10 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     int i;
 
     dev->config_write = virtio_net_pci_vf_write_config;
-    int mmio_bar_id = VIRTIO_PCI(dev)->modern_mem_bar_idx;
-    int msix_bar_id = VIRTIO_PCI(dev)->msix_bar_idx;
-    int nvectors = VIRTIO_PCI(dev)->nvectors;
+    VirtIOPCIProxy *proxy = VIRTIO_PCI(pcie_sriov_get_pf(dev));
+    int mmio_bar_id = proxy->modern_mem_bar_idx;
+    int msix_bar_id = proxy->msix_bar_idx;
+    int nvectors = proxy->nvectors;
 
     memory_region_init_io(&s->mmio, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
         VIRTIO_NET_VF_MMIO_SIZE);
@@ -315,7 +320,7 @@ static void virtio_net_pci_vf_class_init(ObjectClass *class, void *data)
 }
 
 static const TypeInfo virtio_net_pci_vf_info = {
-    .name = TYPE_VIRTIO_NET_PCI_VF,
+    .name = TYPE_VIRTIONETVF,
     .parent = TYPE_PCI_DEVICE,
     .instance_size = sizeof(VirtIONetVfPCI),
     .class_init = virtio_net_pci_vf_class_init,
