@@ -260,6 +260,8 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
         VIRTIO_NET_VF_MSIX_SIZE);
     pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
     memcpy(s->vf.regs, pf_proxy.regs, sizeof(pf_proxy.regs));
+    memcpy(&s->vf.pci_dev, dev,sizeof(PCIDevice));
+    s->vf.modern_bar
     virtio_net_pci_vf_pci_cap_init(&(s->vf));
     ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
                     0, &s->msix,
