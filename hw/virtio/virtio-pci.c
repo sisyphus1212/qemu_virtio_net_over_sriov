@@ -1032,7 +1032,7 @@ static void virtio_pci_one_vector_mask(VirtIOPCIProxy *proxy,
 
     /* If guest supports masking, keep irqfd but mask it.
      * Otherwise, clean it up now.
-     */ 
+     */
     if (vdev->use_guest_notifier_mask && k->guest_notifier_mask) {
         k->guest_notifier_mask(vdev, queue_no, true);
     } else {
@@ -2075,6 +2075,57 @@ static void virtio_pci_device_plugged(DeviceState *d, Error **errp)
         pci_register_bar(&proxy->pci_dev, proxy->legacy_io_bar_idx,
                          PCI_BASE_ADDRESS_SPACE_IO, &proxy->bar);
     }
+}
+
+void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy) {
+    struct virtio_pci_cap cap = {
+        .cap_len = sizeof cap,
+    };
+    struct virtio_pci_notify_cap notify = {
+        .cap.cap_len = sizeof notify,
+        .notify_off_multiplier =
+            cpu_to_le32(virtio_pci_queue_mem_mult(proxy)),
+    };
+    struct virtio_pci_cfg_cap cfg = {
+        .cap.cap_len = sizeof cfg,
+        .cap.cfg_type = VIRTIO_PCI_CAP_PCI_CFG,
+    };
+    struct virtio_pci_notify_cap notify_pio = {
+        .cap.cap_len = sizeof notify,
+        .notify_off_multiplier = cpu_to_le32(0x0),
+    };
+
+    struct virtio_pci_cfg_cap *cfg_mask;
+
+    VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
+    virtio_pci_modern_regions_init(proxy, vdev->name);
+
+    virtio_pci_modern_mem_region_map(proxy, &proxy->common, &cap);
+    virtio_pci_modern_mem_region_map(proxy, &proxy->isr, &cap);
+    virtio_pci_modern_mem_region_map(proxy, &proxy->device, &cap);
+    virtio_pci_modern_mem_region_map(proxy, &proxy->notify, &notify.cap);
+
+    memory_region_init(&proxy->io_bar, OBJECT(proxy),
+                        "virtio-pci-io", 0x4);
+
+    pci_register_bar(&proxy->pci_dev, proxy->modern_io_bar_idx,
+                        PCI_BASE_ADDRESS_SPACE_IO, &proxy->io_bar);
+
+    virtio_pci_modern_io_region_map(proxy, &proxy->notify_pio,
+                                    &notify_pio.cap);
+
+    pci_register_bar(&proxy->pci_dev, proxy->modern_mem_bar_idx,
+                        PCI_BASE_ADDRESS_SPACE_MEMORY |
+                        PCI_BASE_ADDRESS_MEM_PREFETCH |
+                        PCI_BASE_ADDRESS_MEM_TYPE_64,
+                        &proxy->modern_bar);
+
+    proxy->config_cap = virtio_pci_add_mem_cap(proxy, &cfg.cap);
+    cfg_mask = (void *)(proxy->pci_dev.wmask + proxy->config_cap);
+    pci_set_byte(&cfg_mask->cap.bar, ~0x0);
+    pci_set_long((uint8_t *)&cfg_mask->cap.offset, ~0x0);
+    pci_set_long((uint8_t *)&cfg_mask->cap.length, ~0x0);
+    pci_set_long(cfg_mask->pci_cfg_data, ~0x0);
 }
 
 static void virtio_pci_device_unplugged(DeviceState *d)

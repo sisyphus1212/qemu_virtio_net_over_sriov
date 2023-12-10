@@ -268,5 +268,5 @@ void virtio_pci_set_guest_notifier_fd_handler(VirtIODevice *vdev, VirtQueue *vq,
 
 int virtio_pci_add_shm_cap(VirtIOPCIProxy *proxy, uint8_t bar, uint64_t offset,
                            uint64_t length, uint8_t id);
-
+void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy);
 #endif
