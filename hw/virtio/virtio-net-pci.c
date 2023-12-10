@@ -54,6 +54,7 @@ struct VirtIONetPCI {
 struct VirtIONetVfPCI {
     PCIDevice parent_obj;
 
+    VirtIOPCIProxy vf;
     MemoryRegion mmio;
     MemoryRegion msix;
 };
@@ -248,17 +249,18 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     int i;
 
     dev->config_write = virtio_net_pci_vf_write_config;
-    VirtIOPCIProxy *proxy = VIRTIO_PCI(pcie_sriov_get_pf(dev));
-    int mmio_bar_id = proxy->modern_mem_bar_idx;
-    int msix_bar_id = proxy->msix_bar_idx;
-    int nvectors = proxy->nvectors;
+    VirtIOPCIProxy *pf_proxy = VIRTIO_PCI(pcie_sriov_get_pf(dev));
+    int mmio_bar_id = pf_proxy->modern_mem_bar_idx;
+    int msix_bar_id = pf_proxy->msix_bar_idx;
+    int nvectors = pf_proxy->nvectors;
     memory_region_init_io(&s->mmio, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
         VIRTIO_NET_VF_MMIO_SIZE);
     pcie_sriov_vf_register_bar(dev, mmio_bar_id, &s->mmio);
     memory_region_init(&s->msix, OBJECT(dev), "virtio_net_pci_vf-msix",
         VIRTIO_NET_VF_MSIX_SIZE);
     pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
-    virtio_net_pci_vf_pci_cap_init(proxy);
+    memcpy(s->vf.regs, pf_proxy.regs, sizeof(pf_proxy.regs));
+    virtio_net_pci_vf_pci_cap_init(&(s->vf));
     ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
                     0, &s->msix,
                     mmio_bar_id, 0x2000,

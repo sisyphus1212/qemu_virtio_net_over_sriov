@@ -1867,6 +1867,7 @@ static void virtio_pci_modern_region_map(VirtIOPCIProxy *proxy,
                                          MemoryRegion *mr,
                                          uint8_t bar)
 {
+    // proxy->common cap proxy->modern_bar proxy->modern_mem_bar_idx
     memory_region_add_subregion(mr, region->offset, &region->mr);
 
     cap->cfg_type = region->type;
@@ -1881,6 +1882,7 @@ static void virtio_pci_modern_mem_region_map(VirtIOPCIProxy *proxy,
                                              VirtIOPCIRegion *region,
                                              struct virtio_pci_cap *cap)
 {
+
     virtio_pci_modern_region_map(proxy, region, cap,
                                  &proxy->modern_bar, proxy->modern_mem_bar_idx);
 }
@@ -2098,7 +2100,7 @@ void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy) {
     struct virtio_pci_cfg_cap *cfg_mask;
 
     VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
-    virtio_pci_modern_regions_init(proxy, vdev->name);
+    virtio_pci_modern_regions_init(proxy, "vf");
 
     virtio_pci_modern_mem_region_map(proxy, &proxy->common, &cap);
     virtio_pci_modern_mem_region_map(proxy, &proxy->isr, &cap);
