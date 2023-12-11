@@ -40,6 +40,7 @@
 #include "qapi/visitor.h"
 #include "sysemu/replay.h"
 #include "trace.h"
+#include "hw/pci/pcie_sriov.h"
 
 #define VIRTIO_PCI_REGION_SIZE(dev)     VIRTIO_PCI_CONFIG_OFF(msix_present(dev))
 
@@ -2110,16 +2111,13 @@ void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy) {
     memory_region_init(&proxy->io_bar, OBJECT(proxy),
                         "virtio-pci-io", 0x4);
 
-    pci_register_bar(&proxy->pci_dev, proxy->modern_io_bar_idx,
-                        PCI_BASE_ADDRESS_SPACE_IO, &proxy->io_bar);
+    pcie_sriov_vf_register_bar(&proxy->pci_dev, proxy->modern_io_bar_idx,
+                              &proxy->io_bar);
 
     virtio_pci_modern_io_region_map(proxy, &proxy->notify_pio,
                                     &notify_pio.cap);
 
-    pci_register_bar(&proxy->pci_dev, proxy->modern_mem_bar_idx,
-                        PCI_BASE_ADDRESS_SPACE_MEMORY |
-                        PCI_BASE_ADDRESS_MEM_PREFETCH |
-                        PCI_BASE_ADDRESS_MEM_TYPE_64,
+    pcie_sriov_vf_register_bar(&proxy->pci_dev, proxy->modern_mem_bar_idx,
                         &proxy->modern_bar);
 
     proxy->config_cap = virtio_pci_add_mem_cap(proxy, &cfg.cap);

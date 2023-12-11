@@ -255,7 +255,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     int nvectors = pf_proxy->nvectors;
     memory_region_init_io(&s->vf.modern_bar, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
         VIRTIO_NET_VF_MMIO_SIZE);
-    pcie_sriov_vf_register_bar(dev, mmio_bar_id, &s->mmio);
+    pcie_sriov_vf_register_bar(dev, mmio_bar_id, &s->vf.modern_bar);
     memory_region_init(&s->msix, OBJECT(dev), "virtio_net_pci_vf-msix",
         VIRTIO_NET_VF_MSIX_SIZE);
     pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
