@@ -253,7 +253,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     int mmio_bar_id = pf_proxy->modern_mem_bar_idx;
     int msix_bar_id = pf_proxy->msix_bar_idx;
     int nvectors = pf_proxy->nvectors;
-    memory_region_init_io(&s->mmio, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
+    memory_region_init_io(&s->vf.modern_bar, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
         VIRTIO_NET_VF_MMIO_SIZE);
     pcie_sriov_vf_register_bar(dev, mmio_bar_id, &s->mmio);
     memory_region_init(&s->msix, OBJECT(dev), "virtio_net_pci_vf-msix",
@@ -261,7 +261,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
     memcpy(s->vf.regs, pf_proxy.regs, sizeof(pf_proxy.regs));
     memcpy(&s->vf.pci_dev, dev,sizeof(PCIDevice));
-    s->vf.modern_bar
+
     virtio_net_pci_vf_pci_cap_init(&(s->vf));
     ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
                     0, &s->msix,
