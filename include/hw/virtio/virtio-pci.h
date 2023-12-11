@@ -14,7 +14,7 @@
 
 #ifndef QEMU_VIRTIO_PCI_H
 #define QEMU_VIRTIO_PCI_H
-
+#include "standard-headers/linux/virtio_pci.h"
 #include "hw/pci/msi.h"
 #include "hw/virtio/virtio-bus.h"
 #include "qom/object.h"
@@ -268,5 +268,9 @@ void virtio_pci_set_guest_notifier_fd_handler(VirtIODevice *vdev, VirtQueue *vq,
 
 int virtio_pci_add_shm_cap(VirtIOPCIProxy *proxy, uint8_t bar, uint64_t offset,
                            uint64_t length, uint8_t id);
-void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy);
+void virtio_pci_vf_modern_region_map(PCIDevice *dev,
+                                         VirtIOPCIRegion *region,
+                                         struct virtio_pci_cap *cap,
+                                         MemoryRegion *mr,
+                                         uint8_t bar);
 #endif

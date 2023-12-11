@@ -261,8 +261,8 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
     memcpy(s->vf.regs, pf_proxy.regs, sizeof(pf_proxy.regs));
     memcpy(&s->vf.pci_dev, dev,sizeof(PCIDevice));
-
-    virtio_net_pci_vf_pci_cap_init(&(s->vf));
+    virtio_net_pci_vf_pci_cap_init(&(s->vf), dev);
+    //memcpy(dev, &s->vf.pci_dev, sizeof(PCIDevice));
     ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
                     0, &s->msix,
                     mmio_bar_id, 0x2000,
@@ -288,7 +288,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
         herror("Failed to initialize AER capability");
     }
 
-    pcie_ari_init(dev, 0x150);
+    pcie_ari_init(dev, 0x160);
 }
 
 static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
