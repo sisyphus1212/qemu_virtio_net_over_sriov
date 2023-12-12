@@ -2236,8 +2236,8 @@ void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy, PCIDevice *dev) {
     };
 
     struct virtio_pci_cap notify_cfg = {
-        .cap.cap_len = sizeof notify_cfg,
-        .cap.cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG,
+        .cap_len = sizeof notify_cfg,
+        .cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG,
     };
     /*
         proxy->isr.offset = 0x1000;
