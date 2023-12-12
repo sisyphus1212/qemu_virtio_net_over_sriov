@@ -273,4 +273,5 @@ void virtio_pci_vf_modern_region_map(PCIDevice *dev,
                                          struct virtio_pci_cap *cap,
                                          MemoryRegion *mr,
                                          uint8_t bar);
+void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy, PCIDevice *dev);
 #endif
