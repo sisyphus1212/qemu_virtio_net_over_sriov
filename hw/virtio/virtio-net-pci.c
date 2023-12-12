@@ -259,7 +259,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     memory_region_init(&s->msix, OBJECT(dev), "virtio_net_pci_vf-msix",
         VIRTIO_NET_VF_MSIX_SIZE);
     pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
-    memcpy(s->vf.regs, pf_proxy.regs, sizeof(pf_proxy.regs));
+    memcpy(s->vf.regs, pf_proxy->regs, sizeof(pf_proxy->regs));
     memcpy(&s->vf.pci_dev, dev,sizeof(PCIDevice));
     virtio_net_pci_vf_pci_cap_init(&(s->vf), dev);
     //memcpy(dev, &s->vf.pci_dev, sizeof(PCIDevice));
