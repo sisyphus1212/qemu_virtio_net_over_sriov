@@ -2226,8 +2226,8 @@ void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy, PCIDevice *dev) {
     //VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
     virtio_pci_vf_modern_regions_init(proxy, dev, "vf");
 
-    virtio_pci_vf_modern_region_map(dev, &proxy->common, &common_cfg, &proxy->modern_bar, proxy->modern_mem_bar_idx);
-    //virtio_pci_vf_modern_region_map(dev, &proxy->isr, &cap, &proxy->modern_bar, proxy->modern_mem_bar_idx);
+
+    //vivirtio_pci_vf_modern_region_map(dev, &proxy->common, &common_cfg, &proxy->modern_bar, common_cfg.bar);rtio_pci_vf_modern_region_map(dev, &proxy->isr, &cap, &proxy->modern_bar, proxy->modern_mem_bar_idx);
     //virtio_pci_vf_modern_region_map(dev, &proxy->device, &cap, &proxy->modern_bar, proxy->modern_mem_bar_idx);
     //virtio_pci_vf_modern_region_map(dev, &proxy->notify, &notify.cap, &proxy->modern_bar, proxy->modern_mem_bar_idx);
 
