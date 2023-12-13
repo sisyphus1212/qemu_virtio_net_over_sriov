@@ -2229,7 +2229,7 @@ void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy, PCIDevice *dev) {
 
     struct virtio_pci_cap device_cfg = {
         .cap_len = sizeof device_cfg,
-        .cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG,
+        .cfg_type = 0x2,
         .offset = 0x2000,
         .length = 0x1000,
         .bar = 4,
