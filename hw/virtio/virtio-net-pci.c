@@ -263,15 +263,15 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     memcpy(&s->vf.pci_dev, dev,sizeof(PCIDevice));
 
 
-    static const MemoryRegionOps common_ops = {
-        .read = virtio_pci_common_read,
-        .write = virtio_pci_common_write,
-        .impl = {
-            .min_access_size = 1,
-            .max_access_size = 4,
-        },
-        .endianness = DEVICE_LITTLE_ENDIAN,
-    };
+    //static const MemoryRegionOps common_ops = {
+    //    .read = virtio_pci_common_read,
+    //    .write = virtio_pci_common_write,
+    //    .impl = {
+    //        .min_access_size = 1,
+    //        .max_access_size = 4,
+    //    },
+    //    .endianness = DEVICE_LITTLE_ENDIAN,
+    //};
 
     struct virtio_pci_cap cap;
     cap.cfg_type = 3;
