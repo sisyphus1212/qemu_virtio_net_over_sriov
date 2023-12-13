@@ -285,7 +285,6 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
         cap.cap_len - PCI_CAP_FLAGS);
 
-    struct virtio_pci_cap cap;
     cap.cfg_type = 2;
     cap.bar = 4;
     cap.offset = 0x0;
@@ -297,7 +296,6 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
         cap.cap_len - PCI_CAP_FLAGS);
 
-    struct virtio_pci_cap cap;
     cap.cfg_type = 1;
     cap.bar = 4;
     cap.offset = 0x0;
@@ -309,7 +307,6 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
         cap.cap_len - PCI_CAP_FLAGS);
 
-    struct virtio_pci_cap cap;
     cap.cfg_type = 0;
     cap.bar = 4;
     cap.offset = 0x0;
@@ -321,7 +318,6 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
         cap.cap_len - PCI_CAP_FLAGS);
 
-    struct virtio_pci_cap cap;
     cap.cfg_type = 3;
     cap.bar = 4;
     cap.offset = 0x0;
@@ -330,7 +326,6 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
                                 cap.cap_len, &error_abort);
 
-    struct virtio_pci_cap cap;
     cap.cfg_type = 4;
     cap.bar = 4;
     cap.offset = 0x0;
