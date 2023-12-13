@@ -274,16 +274,16 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     };
 
     struct virtio_pci_cap cap;
-    cap->cfg_type = 3;
-    cap->bar = 4;
-    cap->offset = 0x0;
-    cap->length = 0x1000;
-    cap->cap_len = sizeof cap;
+    cap.cfg_type = 3;
+    cap.bar = 4;
+    cap.offset = 0x0;
+    cap.length = 0x1000;
+    cap.cap_len = sizeof cap;
     int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
-                                cap->cap_len, &error_abort);
+                                cap.cap_len, &error_abort);
 
-    memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap->cap_len,
-        cap->cap_len - PCI_CAP_FLAGS);
+    memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
+        cap.cap_len - PCI_CAP_FLAGS);
 
     //virtio_net_pci_vf_pci_cap_init(&(s->vf), dev);
     ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
