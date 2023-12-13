@@ -260,7 +260,6 @@ static void virtio_net_vf_pci_cap_init(PCIDevice *dev, uint8_t cfg_type,
         cap.cap_len - PCI_CAP_FLAGS);
 }
 
-/*
 static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
                                 uint32_t cfg_offset, uint8_t cfg_bar,
                                 uint8_t multiplier, int cfg_length) {
@@ -280,7 +279,6 @@ static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &notify.cap.cap_len,
         notify.cap.cap_len - PCI_CAP_FLAGS);
 }
-*/
 
 static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
 {
@@ -302,19 +300,9 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     memcpy(s->vf.regs, pf_proxy->regs, sizeof(pf_proxy->regs));
     memcpy(&s->vf.pci_dev, dev,sizeof(PCIDevice));
 
-    //static const MemoryRegionOps common_ops = {
-    //    .read = virtio_pci_common_read,
-    //    .write = virtio_pci_common_write,
-    //    .impl = {
-    //        .min_access_size = 1,
-    //        .max_access_size = 4,
-    //    },
-    //    .endianness = DEVICE_LITTLE_ENDIAN,
-    //};
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_NOTIFY_CFG, 0x2000, 0x4, 0x1000);
-    //virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_DEVICE_CFG, 0x2000, 0x4, 0x1000);
     virtio_net_vf_pci_notify_cap_init(dev, 0x3000, 0x4, 4, 0x1000);
 
     ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
