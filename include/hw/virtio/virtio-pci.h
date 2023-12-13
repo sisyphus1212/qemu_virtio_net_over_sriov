@@ -274,4 +274,10 @@ void virtio_pci_vf_modern_region_map(PCIDevice *dev,
                                          MemoryRegion *mr,
                                          uint8_t bar);
 void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy, PCIDevice *dev);
+
+void virtio_pci_common_write(void *opaque, hwaddr addr,
+                                    uint64_t val, unsigned size);
+
+uint64_t virtio_pci_common_read(void *opaque, hwaddr addr,
+                                       unsigned size);
 #endif

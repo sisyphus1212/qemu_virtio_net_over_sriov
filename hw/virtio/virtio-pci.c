@@ -1443,7 +1443,7 @@ int virtio_pci_add_shm_cap(VirtIOPCIProxy *proxy,
     return virtio_pci_add_mem_cap(proxy, &cap.cap);
 }
 
-static uint64_t virtio_pci_common_read(void *opaque, hwaddr addr,
+uint64_t virtio_pci_common_read(void *opaque, hwaddr addr,
                                        unsigned size)
 {
     VirtIOPCIProxy *proxy = opaque;
@@ -1535,7 +1535,7 @@ static uint64_t virtio_pci_common_read(void *opaque, hwaddr addr,
     return val;
 }
 
-static void virtio_pci_common_write(void *opaque, hwaddr addr,
+void virtio_pci_common_write(void *opaque, hwaddr addr,
                                     uint64_t val, unsigned size)
 {
     VirtIOPCIProxy *proxy = opaque;
