@@ -320,7 +320,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
                     0, &s->msix,
                     mmio_bar_id, 0x2000,
-                    0x70, errp);
+                    0x00, errp);
     if (ret) {
         return;
     }
