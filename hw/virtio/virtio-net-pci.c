@@ -290,7 +290,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     cap.offset = 0x0;
     cap.length = 0x1000;
     cap.cap_len = sizeof cap;
-    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
+    offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
                                 cap.cap_len, &error_abort);
 
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
@@ -301,7 +301,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     cap.offset = 0x0;
     cap.length = 0x1000;
     cap.cap_len = sizeof cap;
-    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
+    offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
                                 cap.cap_len, &error_abort);
 
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
@@ -312,7 +312,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     cap.offset = 0x0;
     cap.length = 0x1000;
     cap.cap_len = sizeof cap;
-    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
+    offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
                                 cap.cap_len, &error_abort);
 
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
@@ -323,7 +323,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     cap.offset = 0x0;
     cap.length = 0x1000;
     cap.cap_len = sizeof cap;
-    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
+    offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
                                 cap.cap_len, &error_abort);
 
     cap.cfg_type = 4;
@@ -331,7 +331,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     cap.offset = 0x0;
     cap.length = 0x1000;
     cap.cap_len = sizeof cap;
-    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
+    offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
                                 cap.cap_len, &error_abort);
 
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
