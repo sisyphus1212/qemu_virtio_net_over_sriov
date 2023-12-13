@@ -274,10 +274,10 @@ static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
     };
 
     int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
-                                cap.cap_len, &error_abort);
+                                notify.cap.cap_len, &error_abort);
 
-    memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
-        cap.cap_len - PCI_CAP_FLAGS);
+    memcpy(dev->config + offset + PCI_CAP_FLAGS, &notify.cap.cap_len,
+        notify.cap.cap_len - PCI_CAP_FLAGS);
 }
 
 static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
