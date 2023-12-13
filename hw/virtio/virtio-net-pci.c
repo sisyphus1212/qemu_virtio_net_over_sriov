@@ -242,6 +242,44 @@ static const MemoryRegionOps mmio_ops = {
     },
 };
 
+void virtio_net_vf_pci_cap_init(PCIDevice *dev, uint8_t cfg_type,
+                                uint32_t cfg_offset, uint8_t cfg_bar,
+                                int cfg_length) {
+    struct virtio_pci_cap cap = {
+        .cfg_type = cfg_type;
+        .bar = cfg_bar;
+        .offset = cfg_offset;
+        .length = cfg_length;
+        .cap_len = sizeof cap;
+    };
+
+    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
+                                cap.cap_len, &error_abort);
+
+    memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
+        cap.cap_len - PCI_CAP_FLAGS);
+}
+
+void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
+                                uint32_t cfg_offset, uint8_t cfg_bar,
+                                uint8_t multiplier, int cfg_length) {
+
+    struct virtio_pci_notify_cap notify = {
+        .cap.cap_len = sizeof notify,
+        .notify_off_multiplier = multiplier,
+        .cap.offset = cfg_offset,
+        .cap.length = cfg_length,
+        .cap.cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG,
+        .cap.bar = cfg_bar,
+    };
+
+    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
+                                cap.cap_len, &error_abort);
+
+    memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
+        cap.cap_len - PCI_CAP_FLAGS);
+}
+
 static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
 {
     VirtIONetVfPCI *s = VIRTIONETVF(dev);
@@ -262,7 +300,6 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     memcpy(s->vf.regs, pf_proxy->regs, sizeof(pf_proxy->regs));
     memcpy(&s->vf.pci_dev, dev,sizeof(PCIDevice));
 
-
     //static const MemoryRegionOps common_ops = {
     //    .read = virtio_pci_common_read,
     //    .write = virtio_pci_common_write,
@@ -272,20 +309,12 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
     //    },
     //    .endianness = DEVICE_LITTLE_ENDIAN,
     //};
+    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
+    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
+    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_DEVICE_CFG, 0x2000, 0x4, 0x1000);
+    virtio_net_vf_pci_notify_cap_init(dev, 0x3000, 0x4, 4, 0x1000);
 
-    struct virtio_pci_cap cap;
-    cap.cfg_type = 3;
-    cap.bar = 4;
-    cap.offset = 0x0;
-    cap.length = 0x1000;
-    cap.cap_len = sizeof cap;
-    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
-                                cap.cap_len, &error_abort);
-
-    memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
-        cap.cap_len - PCI_CAP_FLAGS);
-
-    cap.cfg_type = 2;
+    cap.cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG;
     cap.bar = 4;
     cap.offset = 0x0;
     cap.length = 0x1000;
