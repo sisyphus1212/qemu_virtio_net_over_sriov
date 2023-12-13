@@ -2229,7 +2229,7 @@ void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy, PCIDevice *dev) {
 
     struct virtio_pci_cap device_cfg = {
         .cap_len = sizeof device_cfg,
-        .cfg_type = VIRTIO_PCI_CAP_DEVICE_CFG,
+        .cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG,
         .offset = 0x2000,
         .length = 0x1000,
         .bar = 4,
@@ -2271,9 +2271,9 @@ void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy, PCIDevice *dev) {
     virtio_pci_vf_modern_regions_init(proxy, dev, "vf");
 
     virtio_pci_vf_modern_region_map(dev, &proxy->common, &common_cfg, &proxy->modern_bar, common_cfg.bar);
-    //virtio_pci_vf_modern_region_map(dev, &proxy->isr,    &isr_cfg,    &proxy->modern_bar, isr_cfg.bar);
-    //virtio_pci_vf_modern_region_map(dev, &proxy->device, &device_cfg, &proxy->modern_bar, device_cfg.bar);
-    virtio_pci_vf_modern_region_map(dev, &proxy->notify, &notify_cfg, &proxy->modern_bar, notify_cfg.bar);
+    virtio_pci_vf_modern_region_map(dev, &proxy->isr,    &isr_cfg,    &proxy->modern_bar, isr_cfg.bar);
+    virtio_pci_vf_modern_region_map(dev, &proxy->device, &device_cfg, &proxy->modern_bar, device_cfg.bar);
+    //virtio_pci_vf_modern_region_map(dev, &proxy->notify, &notify_cfg, &proxy->modern_bar, notify_cfg.bar);
 
 /*
     memory_region_init(&proxy->io_bar, OBJECT(proxy),
