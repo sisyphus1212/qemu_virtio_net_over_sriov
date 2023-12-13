@@ -2214,14 +2214,14 @@ void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy, PCIDevice *dev) {
 
     struct virtio_pci_cap common_cfg = {
         .cap_len = sizeof common_cfg,
-        .cfg_type = VIRTIO_PCI_CAP_COMMON_CFG,
+        .cfg_type = 2,
         .offset = 0x0,
         .length = 0x1000,
         .bar = 4,
     };
     struct virtio_pci_cap isr_cfg = {
         .cap_len = sizeof isr_cfg,
-        .cfg_type = VIRTIO_PCI_CAP_ISR_CFG,
+        .cfg_type = 2,
         .offset = 0x1000,
         .length = 0x1000,
         .bar = 4,
