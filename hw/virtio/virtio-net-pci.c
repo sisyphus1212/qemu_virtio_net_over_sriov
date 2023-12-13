@@ -260,6 +260,7 @@ static void virtio_net_vf_pci_cap_init(PCIDevice *dev, uint8_t cfg_type,
         cap.cap_len - PCI_CAP_FLAGS);
 }
 
+/*
 static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
                                 uint32_t cfg_offset, uint8_t cfg_bar,
                                 uint8_t multiplier, int cfg_length) {
@@ -279,6 +280,7 @@ static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &notify.cap.cap_len,
         notify.cap.cap_len - PCI_CAP_FLAGS);
 }
+*/
 
 static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
 {
