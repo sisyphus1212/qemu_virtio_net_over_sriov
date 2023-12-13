@@ -246,11 +246,11 @@ void virtio_net_vf_pci_cap_init(PCIDevice *dev, uint8_t cfg_type,
                                 uint32_t cfg_offset, uint8_t cfg_bar,
                                 int cfg_length) {
     struct virtio_pci_cap cap = {
-        .cfg_type = cfg_type;
-        .bar = cfg_bar;
-        .offset = cfg_offset;
-        .length = cfg_length;
-        .cap_len = sizeof cap;
+        .cfg_type = cfg_type,
+        .bar = cfg_bar,
+        .offset = cfg_offset,
+        .length = cfg_length,
+        .cap_len = sizeof cap,
     };
 
     int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
