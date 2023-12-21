@@ -214,10 +214,10 @@ static void virtio_pci_device_write(void *opaque, hwaddr addr,
 
 static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned size)
 {
+    uint16_t bar_idx = 4;
     PCIDevice *vf = PCI_DEVICE(opaque);
     PCIDevice *pf = pcie_sriov_get_pf(vf);
     uint16_t vf_num = pcie_sriov_vf_number(vf);
-    uint16_t bar_idx = 4;
 
     //pci 配置空间地址+sriov_cap offset + vf bar 所在地址
     uint8_t *cfg = pf->config + pf->exp.sriov_cap  + PCI_SRIOV_BAR + vf_num * (bar_idx * 4);
