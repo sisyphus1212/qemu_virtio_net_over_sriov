@@ -161,6 +161,7 @@ static void virtio_net_pci_vf_write_config(PCIDevice *dev, uint32_t addr, uint32
     }
 }
 
+/*
 static uint64_t virtio_pci_device_read(void *opaque, hwaddr addr,
                                        unsigned size)
 {
@@ -188,6 +189,7 @@ static uint64_t virtio_pci_device_read(void *opaque, hwaddr addr,
     }
     return val;
 }
+*/
 
 static void virtio_pci_device_write(void *opaque, hwaddr addr,
                                     uint64_t val, unsigned size)
