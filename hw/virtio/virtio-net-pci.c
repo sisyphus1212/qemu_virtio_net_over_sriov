@@ -211,13 +211,36 @@ static void virtio_pci_device_write(void *opaque, hwaddr addr,
         break;
     }
 }
+
 static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned size)
 {
-    //PCIDevice *vf = PCI_DEVICE(opaque);
-    //PCIDevice *pf = pcie_sriov_get_pf(vf);
-    return virtio_pci_device_read(opaque, addr, size);
+    PCIDevice *vf = PCI_DEVICE(opaque);
+    PCIDevice *pf = pcie_sriov_get_pf(vf);
+    uint32_t val =
+    uint16_t vf_num = pcie_sriov_vf_number(vf)
+    uint16_t bar_idx = 4;
+    //pci 配置空间地址+sriov_cap offset + vf bar 所在地址
+    uint8_t *cfg = pf->config + pf->exp.sriov_cap  + PCI_SRIOV_BAR + vf_num*(bar_idx*4);
+    uint32_t vf_common_cfg_addr = *(uint32_t *)cfg;
+    //vf->config = vf_common_cfg_addr;
     //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), false);
     //return addr == HWADDR_MAX ? 0 : igb_mmio_read(pf, addr, size);
+
+    switch (size) {
+    case 1:
+        val = ldub_p(vf_common_cfg_addr + addr);
+        break;
+    case 2:
+        val = lduw_le_p(vf_common_cfg_addr + addr);
+        break;
+    case 4:
+        val = ldl_le_p(vf_common_cfg_addr + addr);
+        break;
+    default:
+        val = 0;
+        break;
+    }
+    return val;
 }
 
 static void virtio_net_pci_vf_mmio_write(void *opaque, hwaddr addr, uint64_t val,
@@ -298,7 +321,7 @@ static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
         VIRTIO_NET_VF_MSIX_SIZE);
     pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
     memcpy(s->vf.regs, pf_proxy->regs, sizeof(pf_proxy->regs));
-    memcpy(&s->vf.pci_dev, dev,sizeof(PCIDevice));
+    memcpy(&s->vf.pci_dev, dev, sizeof(PCIDevice));
 
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
