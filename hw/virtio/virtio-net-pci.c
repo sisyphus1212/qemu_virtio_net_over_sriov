@@ -225,16 +225,16 @@ static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned 
     //vf->config = vf_common_cfg_addr;
     //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), false);
     //return addr == HWADDR_MAX ? 0 : igb_mmio_read(pf, addr, size);
-
+    void * hw_addr = vf_common_cfg_addr + addr
     switch (size) {
     case 1:
-        val = ldub_p(vf_common_cfg_addr + addr);
+        val = ldub_p(hw_addr);
         break;
     case 2:
-        val = lduw_le_p(vf_common_cfg_addr + addr);
+        val = lduw_le_p(hw_addr);
         break;
     case 4:
-        val = ldl_le_p(vf_common_cfg_addr + addr);
+        val = ldl_le_p(hw_addr);
         break;
     default:
         val = 0;
