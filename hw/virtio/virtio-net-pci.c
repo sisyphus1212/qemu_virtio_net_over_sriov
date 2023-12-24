@@ -222,8 +222,8 @@ static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned 
     uint16_t vf_num = pcie_sriov_vf_number(vf);
     uint32_t val;
     //pci 配置空间地址+sriov_cap offset + vf bar 所在地址
-    uint8_t *cfg = pf->config + pf->exp.sriov_cap  + PCI_SRIOV_BAR + vf_num * (bar_idx * 4);
-    uint8_t * vf_common_cfg_addr = (uint8_t *)(intptr_t)(*(uint32_t *)cfg);
+    //uint8_t *cfg = pf->config + pf->exp.sriov_cap  + PCI_SRIOV_BAR + vf_num * (bar_idx * 4);
+    uint8_t * vf_common_cfg_addr = pf->config;
     //vf->config = vf_common_cfg_addr;
     //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), false);
     //return addr == HWADDR_MAX ? 0 : igb_mmio_read(pf, addr, size);
