@@ -216,7 +216,7 @@ static void virtio_pci_device_write(void *opaque, hwaddr addr,
 
 static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned size)
 {
-    uint16_t bar_idx = 4;
+    //uint16_t bar_idx = 4;
     PCIDevice *vf = (PCIDevice *)(opaque);
     PCIDevice *pf = pcie_sriov_get_pf(vf);
     //uint16_t vf_num = pcie_sriov_vf_number(vf);
