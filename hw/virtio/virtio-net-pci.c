@@ -52,11 +52,7 @@ struct VirtIONetPCI {
 };
 
 struct VirtIONetVfPCI {
-    PCIDevice parent_obj;
-
-    VirtIOPCIProxy vf;
-    MemoryRegion mmio;
-    MemoryRegion msix;
+    VirtIONetPCI virtio_vf;
 };
 
 static Property virtio_net_properties[] = {
@@ -305,9 +301,9 @@ static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
         notify.cap.cap_len - PCI_CAP_FLAGS);
 }
 
-static void virtio_net_pci_vf_pci_realize(PCIDevice *dev, Error **errp)
+static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
 {
-    VirtIONetVfPCI *s = VIRTIONETVF(dev);
+    VirtIONetVfPCI *s = TYPE_VIRTIO_NET_PCI(dev);
     int ret;
     int i;
 
@@ -370,42 +366,42 @@ static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
     .class_init    = virtio_net_pci_class_init,
 };
 
-static void virtio_net_pci_vf_class_init(ObjectClass *class, void *data)
+static void virtio_net_pci_vf_class_init(ObjectClass *klass, void *data)
 {
-    DeviceClass *dc = DEVICE_CLASS(class);
-    PCIDeviceClass *c = PCI_DEVICE_CLASS(class);
-    ResettableClass *rc = RESETTABLE_CLASS(class);
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
+    VirtioPCIClass *vpciklass = VIRTIO_PCI_CLASS(klass);
+    ResettableClass *rc = RESETTABLE_CLASS(klass);
 
-    c->realize = virtio_net_pci_vf_pci_realize;
-    c->exit = virtio_net_pci_vf_pci_uninit;
-    c->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
-    c->device_id = PCI_DEVICE_ID_VIRTIO_NET;
-    c->revision = VIRTIO_PCI_ABI_VERSION;
-    c->class_id = PCI_CLASS_NETWORK_ETHERNET;
-
+    k->romfile = "efi-virtio.rom";
+    k->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
+    k->device_id = PCI_DEVICE_ID_VIRTIO_NET;
+    k->revision = VIRTIO_PCI_ABI_VERSION;
+    k->class_id = PCI_CLASS_NETWORK_ETHERNET;
+    k->exit = virtio_net_pci_vf_pci_uninit;
     rc->phases.hold = virtio_net_pci_vf_qdev_reset_hold;
-
     dc->desc = "virtio net pci virtual function";
     dc->user_creatable = false;
-
+    set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
+    device_class_set_props(dc, virtio_net_properties);
+    vpciklass->realize = virtio_net_pci_vf_realize;
     set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
 }
 
-static const TypeInfo virtio_net_pci_vf_info = {
-    .name = TYPE_VIRTIONETVF,
-    .parent = TYPE_PCI_DEVICE,
-    .instance_size = sizeof(VirtIONetVfPCI),
-    .class_init = virtio_net_pci_vf_class_init,
-    .interfaces = (InterfaceInfo[]) {
-        { INTERFACE_PCIE_DEVICE },
-        { }
-    },
+static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info = {
+    .base_name             = TYPE_VIRTIO_NET_PCI,
+    .generic_name          = "virtio-net-pci-vf",
+    .transitional_name     = "virtio-net-pci-vf-transitional",
+    .non_transitional_name = "virtio-net-pci-vf-non-transitional",
+    .instance_size = sizeof(VirtIONetPCI),
+    .instance_init = virtio_net_pci_instance_init,
+    .class_init    = virtio_net_pci_vf_class_init,
 };
 
 static void virtio_net_pci_register(void)
 {
     virtio_pci_types_register(&virtio_net_pci_info);
-    type_register_static(&virtio_net_pci_vf_info);
+    virtio_pci_types_register(&virtio_net_pci_vf_info);
 }
 
 type_init(virtio_net_pci_register)
