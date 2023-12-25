@@ -40,10 +40,6 @@ DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI,
 DECLARE_INSTANCE_CHECKER(VirtIONetVfPCI, VIRTIO_NET_PCI_VF,
                          TYPE_VIRTIO_NET_PCI_VF)
 
-//#define TYPE_VIRTIO_NET_PCI_VF "virtio-net-pci-vf"
-//OBJECT_DECLARE_SIMPLE_TYPE(VirtIONetVfPCI, VIRTIO_NET_PCI_VF)
-//#define VIRTIO_NET_PCI_VF(obj) OBJECT_CHECK(VirtIONetVfPCI, (obj), TYPE_VIRTIO_NET_PCI_VF)
-
 struct VirtIONetPCI {
     VirtIOPCIProxy parent_obj;
     VirtIONet vdev;
@@ -390,11 +386,11 @@ static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
 };
 
 static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info = {
-    .base_name             = TYPE_VIRTIO_NET_PCI,
+    .base_name             = TYPE_VIRTIO_NET_PCI_VF,
     .generic_name          = "virtio-net-pci-vf",
     .transitional_name     = "virtio-net-pci-vf-transitional",
     .non_transitional_name = "virtio-net-pci-vf-non-transitional",
-    .instance_size = sizeof(VirtIONetPCI),
+    .instance_size = sizeof(VirtIONetVfPCI),
     .instance_init = virtio_net_pci_instance_init,
     .class_init    = virtio_net_pci_vf_class_init,
 };
