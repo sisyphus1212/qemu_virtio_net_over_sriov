@@ -254,9 +254,9 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
     //    return;
     //}
 
-    for (i = 0; i < nvectors; i++) {
-        msix_vector_use(dev, i);
-    }
+    //for (i = 0; i < nvectors; i++) {
+    //    msix_vector_use(dev, i);
+    //}
 
     if (pcie_endpoint_cap_init(dev, 0) < 0) {
         herror("Failed to initialize PCIe capability");
