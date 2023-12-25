@@ -27,6 +27,7 @@
 #include "hw/pci/msix.h"
 
 typedef struct VirtIONetPCI VirtIONetPCI;
+typedef struct VirtIONetVfPCI VirtIONetVfPCI;
 /*
  * virtio-net-pci: This extends VirtioPCIProxy.
  */
