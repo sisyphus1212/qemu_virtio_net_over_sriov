@@ -224,7 +224,7 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
 {
     VirtIONetVfPCI *s = VIRTIO_NET_PCI_VF(vdev);
     //int ret;
-    int i;
+    //int i;
     PCIDevice *dev = (PCIDevice *)vdev;
     dev->config_write = virtio_net_pci_vf_write_config;
     VirtIOPCIProxy *pf_proxy = VIRTIO_PCI(pcie_sriov_get_pf(dev));
