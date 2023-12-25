@@ -246,13 +246,13 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
 
     //virtio_net_vf_pci_notify_cap_init(dev, 0x3000, 0x4, 4, 0x1000);
 
-    ret = msix_init(dev, nvectors, &vf_proxy->pci_dev.msix_exclusive_bar, msix_bar_id,
-                    0, &vf_proxy->pci_dev.msix_exclusive_bar,
-                    mmio_bar_id, 0x2000,
-                    0x00, errp);
-    if (ret) {
-        return;
-    }
+    //ret = msix_init(dev, nvectors, &vf_proxy->pci_dev.msix_exclusive_bar, msix_bar_id,
+    //                0, &vf_proxy->pci_dev.msix_exclusive_bar,
+    //                mmio_bar_id, 0x2000,
+    //                0x00, errp);
+    //if (ret) {
+    //    return;
+    //}
 
     for (i = 0; i < nvectors; i++) {
         msix_vector_use(dev, i);
