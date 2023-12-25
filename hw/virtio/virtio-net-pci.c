@@ -37,6 +37,7 @@ DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI,
                          TYPE_VIRTIO_NET_PCI)
 
 #define TYPE_VIRTIO_NET_PCI_VF "virtio-net-pci-vf-base"
+#define TYPE_VIRTIO_NET_PCI_VF_GENERIC "virtio-net-pci-vf"
 DECLARE_INSTANCE_CHECKER(VirtIONetVfPCI, VIRTIO_NET_PCI_VF,
                          TYPE_VIRTIO_NET_PCI_VF)
 
@@ -84,7 +85,7 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     PCIDevice *pci_dev = &vpci_dev->pci_dev;
     pcie_ari_init(pci_dev, VIRTIO_NET_CAP_ARI_OFFSET);
 
-    pcie_sriov_pf_init(pci_dev, VIRTIO_NET_CAP_SRIOV_OFFSET, TYPE_VIRTIO_NET_PCI_VF,
+    pcie_sriov_pf_init(pci_dev, VIRTIO_NET_CAP_SRIOV_OFFSET, TYPE_VIRTIO_NET_PCI_VF_GENERIC,
         VIRTIO_NET_VF_DEV_ID, 8, 8,
         VIRTIO_NET_VF_OFFSET, VIRTIO_NET_VF_STRIDE);
 
