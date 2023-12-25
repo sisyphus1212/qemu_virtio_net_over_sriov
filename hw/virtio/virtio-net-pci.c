@@ -230,7 +230,7 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
     VirtIOPCIProxy *pf_proxy = VIRTIO_PCI(pcie_sriov_get_pf(dev));
     VirtIOPCIProxy *vf_proxy = VIRTIO_PCI(dev);
     int mmio_bar_id = 4; //pf_proxy->modern_mem_bar_idx;
-    int msix_bar_id = 1; //pf_proxy->msix_bar_idx;
+    //int msix_bar_id = 1; //pf_proxy->msix_bar_idx;
     int nvectors = pf_proxy->nvectors;
     memory_region_init_io(&vf_proxy->modern_bar, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
         VIRTIO_NET_VF_MMIO_SIZE);
