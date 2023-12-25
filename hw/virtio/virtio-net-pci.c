@@ -211,6 +211,16 @@ static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
         notify.cap.cap_len - PCI_CAP_FLAGS);
 }
 
+static void virtio_net_pci_vf_write_config(PCIDevice *dev, uint32_t addr, uint32_t val,
+    int len)
+{
+    pci_default_write_config(dev, addr, val, len);
+    if (object_property_get_bool(OBJECT(pcie_sriov_get_pf(dev)),
+                                 "x-pcie-flr-init", &error_abort)) {
+        pcie_cap_flr_write_config(dev, addr, val, len);
+    }
+}
+
 static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
 {
     VirtIONetVfPCI *s = VIRTIO_NET_PCI(dev);
@@ -282,15 +292,7 @@ static void virtio_net_pci_vf_qdev_reset_hold(Object *obj)
     //igb_vf_reset(pcie_sriov_get_pf(vf), pcie_sriov_vf_number(vf));
 }
 
-static void virtio_net_pci_vf_write_config(PCIDevice *dev, uint32_t addr, uint32_t val,
-    int len)
-{
-    pci_default_write_config(dev, addr, val, len);
-    if (object_property_get_bool(OBJECT(pcie_sriov_get_pf(dev)),
-                                 "x-pcie-flr-init", &error_abort)) {
-        pcie_cap_flr_write_config(dev, addr, val, len);
-    }
-}
+
 
 static void virtio_net_pci_class_init(ObjectClass *klass, void *data)
 {
