@@ -225,12 +225,12 @@ static void virtio_net_pci_vf_write_config(PCIDevice *dev, uint32_t addr, uint32
         pcie_cap_flr_write_config(dev, addr, val, len);
     }
 }
-static void virtio_net_pci_vf_realize(VirtIOPCIProxy *dev, Error **errp)
+static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
 {
-    VirtIONetVfPCI *s = TYPE_VIRTIO_NET_PCI_VF(dev);
+    VirtIONetVfPCI *s = TYPE_VIRTIO_NET_PCI_VF(vdev);
     int ret;
     int i;
-
+    PCIDevice *dev = (PCIDevice *)vdev;
     dev->config_write = virtio_net_pci_vf_write_config;
     VirtIOPCIProxy *pf_proxy = VIRTIO_PCI(pcie_sriov_get_pf(dev));
     VirtIOPCIProxy *vf_proxy = VIRTIO_PCI(dev);
