@@ -213,7 +213,7 @@ static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
 
 static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
 {
-    VirtIONetVfPCI *s = TYPE_VIRTIO_NET_PCI(dev);
+    VirtIONetVfPCI *s = VIRTIO_NET_PCI(dev);
     int ret;
     int i;
 
