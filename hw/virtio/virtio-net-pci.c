@@ -382,7 +382,6 @@ static void virtio_net_pci_vf_class_init(ObjectClass *klass, void *data)
     rc->phases.hold = virtio_net_pci_vf_qdev_reset_hold;
     dc->desc = "virtio net pci virtual function";
     dc->user_creatable = false;
-    set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
     device_class_set_props(dc, virtio_net_properties);
     vpciklass->realize = virtio_net_pci_vf_realize;
     set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
