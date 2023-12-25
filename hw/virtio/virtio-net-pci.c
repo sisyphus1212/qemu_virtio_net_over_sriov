@@ -234,17 +234,21 @@ static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
 
     dev->config_write = virtio_net_pci_vf_write_config;
     VirtIOPCIProxy *pf_proxy = VIRTIO_PCI(pcie_sriov_get_pf(dev));
+    VirtIOPCIProxy *vf_proxy = VIRTIO_PCI(dev);
     int mmio_bar_id = 4; //pf_proxy->modern_mem_bar_idx;
     int msix_bar_id = 1; //pf_proxy->msix_bar_idx;
     int nvectors = pf_proxy->nvectors;
-    memory_region_init_io(&s->virtio_vf.modern_bar, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
+    memory_region_init_io(&vf_proxy.modern_bar, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
         VIRTIO_NET_VF_MMIO_SIZE);
-    pcie_sriov_vf_register_bar(dev, mmio_bar_id, &s->virtio_vf.modern_bar);
-    memory_region_init(&s->msix, OBJECT(dev), "virtio_net_pci_vf-msix",
-        VIRTIO_NET_VF_MSIX_SIZE);
-    pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
-    memcpy(s->virtio_vf.regs, pf_proxy->regs, sizeof(pf_proxy->regs));
-    memcpy(&s->virtio_vf.pci_dev, dev, sizeof(PCIDevice));
+    pcie_sriov_vf_register_bar(dev, mmio_bar_id, &vf_proxy.modern_bar);
+
+    //memory_region_init(&s->msix, OBJECT(dev), "virtio_net_pci_vf-msix",
+    //    VIRTIO_NET_VF_MSIX_SIZE);
+    //pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
+
+    char* name = g_strdup_printf("%s-msix", vf_proxy->name);
+    memory_region_init(&vf_proxy->msix_exclusive_bar, OBJECT(vf_proxy), name, VIRTIO_NET_VF_MSIX_SIZE);
+    //memcpy(vf_proxy.regs, pf_proxy->regs, sizeof(pf_proxy->regs));
 
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
@@ -253,8 +257,8 @@ static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
 
     virtio_net_vf_pci_notify_cap_init(dev, 0x3000, 0x4, 4, 0x1000);
 
-    ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
-                    0, &s->msix,
+    ret = msix_init(dev, nvectors, &vf_proxy->msix_exclusive_bar, msix_bar_id,
+                    0, &vf_proxy->msix_exclusive_bar,
                     mmio_bar_id, 0x2000,
                     0x00, errp);
     if (ret) {
