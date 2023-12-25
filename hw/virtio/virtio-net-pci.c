@@ -97,6 +97,77 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     qdev_realize(vdev, BUS(&vpci_dev->bus), errp);
 }
 
+static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
+{
+    VirtIONetVfPCI *s = TYPE_VIRTIO_NET_PCI(dev);
+    int ret;
+    int i;
+
+    dev->config_write = virtio_net_pci_vf_write_config;
+    VirtIOPCIProxy *pf_proxy = VIRTIO_PCI(pcie_sriov_get_pf(dev));
+    int mmio_bar_id = 4; //pf_proxy->modern_mem_bar_idx;
+    int msix_bar_id = 1; //pf_proxy->msix_bar_idx;
+    int nvectors = pf_proxy->nvectors;
+    memory_region_init_io(&s->vf.modern_bar, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
+        VIRTIO_NET_VF_MMIO_SIZE);
+    pcie_sriov_vf_register_bar(dev, mmio_bar_id, &s->vf.modern_bar);
+    memory_region_init(&s->msix, OBJECT(dev), "virtio_net_pci_vf-msix",
+        VIRTIO_NET_VF_MSIX_SIZE);
+    pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
+    memcpy(s->vf.regs, pf_proxy->regs, sizeof(pf_proxy->regs));
+    memcpy(&s->vf.pci_dev, dev, sizeof(PCIDevice));
+
+    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
+    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
+    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_DEVICE_CFG, 0x2000, 0x4, 0x1000);
+    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_NOTIFY_CFG, 0x3000, 0x4, 0x1000);
+
+    virtio_net_vf_pci_notify_cap_init(dev, 0x3000, 0x4, 4, 0x1000);
+
+    ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
+                    0, &s->msix,
+                    mmio_bar_id, 0x2000,
+                    0x00, errp);
+    if (ret) {
+        return;
+    }
+
+    for (i = 0; i < nvectors; i++) {
+        msix_vector_use(dev, i);
+    }
+
+    if (pcie_endpoint_cap_init(dev, 0xa0) < 0) {
+        herror("Failed to initialize PCIe capability");
+    }
+
+    if (object_property_get_bool(OBJECT(pcie_sriov_get_pf(dev)),
+                                 "x-pcie-flr-init", &error_abort)) {
+        pcie_cap_flr_init(dev);
+    }
+
+    if (pcie_aer_init(dev, 1, 0x100, 0x40, errp) < 0) {
+        herror("Failed to initialize AER capability");
+    }
+
+    pcie_ari_init(dev, 0x160);
+}
+
+static void virtio_net_pci_vf_pci_uninit(PCIDevice *dev)
+{
+    VirtIONetVfPCI *s = VIRTIONETVF(dev);
+
+    pcie_aer_exit(dev);
+    pcie_cap_exit(dev);
+    msix_unuse_all_vectors(dev);
+    msix_uninit(dev, &s->msix, &s->msix);
+}
+
+static void virtio_net_pci_vf_qdev_reset_hold(Object *obj)
+{
+    //PCIDevice *vf = PCI_DEVICE(obj);
+    //igb_vf_reset(pcie_sriov_get_pf(vf), pcie_sriov_vf_number(vf));
+}
+
 static void virtio_net_pci_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
@@ -142,22 +213,6 @@ static void virtio_net_pci_instance_init(Object *obj)
                                 TYPE_VIRTIO_NET);
     object_property_add_alias(obj, "bootindex", OBJECT(&dev->vdev),
                               "bootindex");
-}
-
-static void virtio_net_pci_vf_qdev_reset_hold(Object *obj)
-{
-    //PCIDevice *vf = PCI_DEVICE(obj);
-    //igb_vf_reset(pcie_sriov_get_pf(vf), pcie_sriov_vf_number(vf));
-}
-
-static void virtio_net_pci_vf_pci_uninit(PCIDevice *dev)
-{
-    VirtIONetVfPCI *s = VIRTIONETVF(dev);
-
-    pcie_aer_exit(dev);
-    pcie_cap_exit(dev);
-    msix_unuse_all_vectors(dev);
-    msix_uninit(dev, &s->msix, &s->msix);
 }
 
 static void virtio_net_pci_vf_write_config(PCIDevice *dev, uint32_t addr, uint32_t val,
@@ -312,61 +367,6 @@ static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
 
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &notify.cap.cap_len,
         notify.cap.cap_len - PCI_CAP_FLAGS);
-}
-
-static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
-{
-    VirtIONetVfPCI *s = TYPE_VIRTIO_NET_PCI(dev);
-    int ret;
-    int i;
-
-    dev->config_write = virtio_net_pci_vf_write_config;
-    VirtIOPCIProxy *pf_proxy = VIRTIO_PCI(pcie_sriov_get_pf(dev));
-    int mmio_bar_id = 4; //pf_proxy->modern_mem_bar_idx;
-    int msix_bar_id = 1; //pf_proxy->msix_bar_idx;
-    int nvectors = pf_proxy->nvectors;
-    memory_region_init_io(&s->vf.modern_bar, OBJECT(dev), &mmio_ops, s, "virtio_net_pci_vf-mmio",
-        VIRTIO_NET_VF_MMIO_SIZE);
-    pcie_sriov_vf_register_bar(dev, mmio_bar_id, &s->vf.modern_bar);
-    memory_region_init(&s->msix, OBJECT(dev), "virtio_net_pci_vf-msix",
-        VIRTIO_NET_VF_MSIX_SIZE);
-    pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
-    memcpy(s->vf.regs, pf_proxy->regs, sizeof(pf_proxy->regs));
-    memcpy(&s->vf.pci_dev, dev, sizeof(PCIDevice));
-
-    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
-    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
-    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_DEVICE_CFG, 0x2000, 0x4, 0x1000);
-    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_NOTIFY_CFG, 0x3000, 0x4, 0x1000);
-
-    virtio_net_vf_pci_notify_cap_init(dev, 0x3000, 0x4, 4, 0x1000);
-
-    ret = msix_init(dev, nvectors, &s->msix, msix_bar_id,
-                    0, &s->msix,
-                    mmio_bar_id, 0x2000,
-                    0x00, errp);
-    if (ret) {
-        return;
-    }
-
-    for (i = 0; i < nvectors; i++) {
-        msix_vector_use(dev, i);
-    }
-
-    if (pcie_endpoint_cap_init(dev, 0xa0) < 0) {
-        herror("Failed to initialize PCIe capability");
-    }
-
-    if (object_property_get_bool(OBJECT(pcie_sriov_get_pf(dev)),
-                                 "x-pcie-flr-init", &error_abort)) {
-        pcie_cap_flr_init(dev);
-    }
-
-    if (pcie_aer_init(dev, 1, 0x100, 0x40, errp) < 0) {
-        herror("Failed to initialize AER capability");
-    }
-
-    pcie_ari_init(dev, 0x160);
 }
 
 static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
