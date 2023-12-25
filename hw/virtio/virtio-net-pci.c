@@ -292,7 +292,7 @@ static void virtio_net_pci_vf_pci_uninit(PCIDevice *dev)
     pcie_aer_exit(dev);
     pcie_cap_exit(dev);
     msix_unuse_all_vectors(dev);
-    msix_uninit(dev, &s->msix, &s->msix);
+    //msix_uninit(dev, &s->msix, &s->msix);
 }
 
 static void virtio_net_pci_vf_qdev_reset_hold(Object *obj)
