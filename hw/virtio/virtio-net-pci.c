@@ -97,6 +97,120 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     qdev_realize(vdev, BUS(&vpci_dev->bus), errp);
 }
 
+static void virtio_pci_device_write(void *opaque, hwaddr addr,
+                                    uint64_t val, unsigned size)
+{
+    VirtIOPCIProxy *proxy = opaque;
+    VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
+
+    if (vdev == NULL) {
+        return;
+    }
+
+    switch (size) {
+    case 1:
+        virtio_config_modern_writeb(vdev, addr, val);
+        break;
+    case 2:
+        virtio_config_modern_writew(vdev, addr, val);
+        break;
+    case 4:
+        virtio_config_modern_writel(vdev, addr, val);
+        break;
+    }
+}
+
+static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned size)
+{
+    //uint16_t bar_idx = 4;
+    PCIDevice *vf = (PCIDevice *)(opaque);
+    PCIDevice *pf = pcie_sriov_get_pf(vf);
+    //uint16_t vf_num = pcie_sriov_vf_number(vf);
+    uint32_t val;
+    //pci 配置空间地址+sriov_cap offset + vf bar 所在地址
+    //uint8_t *cfg = pf->config + pf->exp.sriov_cap  + PCI_SRIOV_BAR + vf_num * (bar_idx * 4);
+    uint8_t * vf_common_cfg_addr = pf->config;
+    //vf->config = vf_common_cfg_addr;
+    //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), false);
+    //return addr == HWADDR_MAX ? 0 : igb_mmio_read(pf, addr, size);
+    void * hw_addr = vf_common_cfg_addr + addr;
+    switch (size) {
+    case 1:
+        val = ldub_p(hw_addr);
+        break;
+    case 2:
+        val = lduw_le_p(hw_addr);
+        break;
+    case 4:
+        val = ldl_le_p(hw_addr);
+        break;
+    default:
+        val = 0;
+        break;
+    }
+    return val;
+}
+
+static void virtio_net_pci_vf_mmio_write(void *opaque, hwaddr addr, uint64_t val,
+    unsigned size)
+{
+    //PCIDevice *vf = PCI_DEVICE(opaque);
+    //PCIDevice *pf = pcie_sriov_get_pf(vf);
+    return virtio_pci_device_write(opaque, addr, val, size);
+    //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), true);
+    //if (addr != HWADDR_MAX) {
+    //    virtio_pci_device_write(pf, addr, val, size);
+    //}
+}
+
+static const MemoryRegionOps mmio_ops = {
+    .read =  virtio_net_pci_vf_mmio_read,
+    .write =  virtio_net_pci_vf_mmio_write,
+    .endianness = DEVICE_LITTLE_ENDIAN,
+    .impl = {
+        .min_access_size = 4,
+        .max_access_size = 4,
+    },
+};
+
+static void virtio_net_vf_pci_cap_init(PCIDevice *dev, uint8_t cfg_type,
+                                uint32_t cfg_offset, uint8_t cfg_bar,
+                                int cfg_length) {
+    struct virtio_pci_cap cap = {
+        .cfg_type = cfg_type,
+        .bar = cfg_bar,
+        .offset = cfg_offset,
+        .length = cfg_length,
+        .cap_len = sizeof cap,
+    };
+
+    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
+                                cap.cap_len, &error_abort);
+
+    memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
+        cap.cap_len - PCI_CAP_FLAGS);
+}
+
+static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
+                                uint32_t cfg_offset, uint8_t cfg_bar,
+                                uint8_t multiplier, int cfg_length) {
+
+    struct virtio_pci_notify_cap notify = {
+        .cap.cap_len = sizeof notify,
+        .notify_off_multiplier = multiplier,
+        .cap.offset = cfg_offset,
+        .cap.length = cfg_length,
+        .cap.cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG,
+        .cap.bar = cfg_bar,
+    };
+
+    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
+                                notify.cap.cap_len, &error_abort);
+
+    memcpy(dev->config + offset + PCI_CAP_FLAGS, &notify.cap.cap_len,
+        notify.cap.cap_len - PCI_CAP_FLAGS);
+}
+
 static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
 {
     VirtIONetVfPCI *s = TYPE_VIRTIO_NET_PCI(dev);
@@ -256,119 +370,7 @@ static uint64_t virtio_pci_device_read(void *opaque, hwaddr addr,
 }
 */
 
-static void virtio_pci_device_write(void *opaque, hwaddr addr,
-                                    uint64_t val, unsigned size)
-{
-    VirtIOPCIProxy *proxy = opaque;
-    VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
 
-    if (vdev == NULL) {
-        return;
-    }
-
-    switch (size) {
-    case 1:
-        virtio_config_modern_writeb(vdev, addr, val);
-        break;
-    case 2:
-        virtio_config_modern_writew(vdev, addr, val);
-        break;
-    case 4:
-        virtio_config_modern_writel(vdev, addr, val);
-        break;
-    }
-}
-
-static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned size)
-{
-    //uint16_t bar_idx = 4;
-    PCIDevice *vf = (PCIDevice *)(opaque);
-    PCIDevice *pf = pcie_sriov_get_pf(vf);
-    //uint16_t vf_num = pcie_sriov_vf_number(vf);
-    uint32_t val;
-    //pci 配置空间地址+sriov_cap offset + vf bar 所在地址
-    //uint8_t *cfg = pf->config + pf->exp.sriov_cap  + PCI_SRIOV_BAR + vf_num * (bar_idx * 4);
-    uint8_t * vf_common_cfg_addr = pf->config;
-    //vf->config = vf_common_cfg_addr;
-    //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), false);
-    //return addr == HWADDR_MAX ? 0 : igb_mmio_read(pf, addr, size);
-    void * hw_addr = vf_common_cfg_addr + addr;
-    switch (size) {
-    case 1:
-        val = ldub_p(hw_addr);
-        break;
-    case 2:
-        val = lduw_le_p(hw_addr);
-        break;
-    case 4:
-        val = ldl_le_p(hw_addr);
-        break;
-    default:
-        val = 0;
-        break;
-    }
-    return val;
-}
-
-static void virtio_net_pci_vf_mmio_write(void *opaque, hwaddr addr, uint64_t val,
-    unsigned size)
-{
-    //PCIDevice *vf = PCI_DEVICE(opaque);
-    //PCIDevice *pf = pcie_sriov_get_pf(vf);
-    return virtio_pci_device_write(opaque, addr, val, size);
-    //addr = vf_to_pf_addr(addr, pcie_sriov_vf_number(vf), true);
-    //if (addr != HWADDR_MAX) {
-    //    virtio_pci_device_write(pf, addr, val, size);
-    //}
-}
-
-static const MemoryRegionOps mmio_ops = {
-    .read =  virtio_net_pci_vf_mmio_read,
-    .write =  virtio_net_pci_vf_mmio_write,
-    .endianness = DEVICE_LITTLE_ENDIAN,
-    .impl = {
-        .min_access_size = 4,
-        .max_access_size = 4,
-    },
-};
-
-static void virtio_net_vf_pci_cap_init(PCIDevice *dev, uint8_t cfg_type,
-                                uint32_t cfg_offset, uint8_t cfg_bar,
-                                int cfg_length) {
-    struct virtio_pci_cap cap = {
-        .cfg_type = cfg_type,
-        .bar = cfg_bar,
-        .offset = cfg_offset,
-        .length = cfg_length,
-        .cap_len = sizeof cap,
-    };
-
-    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
-                                cap.cap_len, &error_abort);
-
-    memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
-        cap.cap_len - PCI_CAP_FLAGS);
-}
-
-static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
-                                uint32_t cfg_offset, uint8_t cfg_bar,
-                                uint8_t multiplier, int cfg_length) {
-
-    struct virtio_pci_notify_cap notify = {
-        .cap.cap_len = sizeof notify,
-        .notify_off_multiplier = multiplier,
-        .cap.offset = cfg_offset,
-        .cap.length = cfg_length,
-        .cap.cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG,
-        .cap.bar = cfg_bar,
-    };
-
-    int offset = pci_add_capability(dev, PCI_CAP_ID_VNDR, 0,
-                                notify.cap.cap_len, &error_abort);
-
-    memcpy(dev->config + offset + PCI_CAP_FLAGS, &notify.cap.cap_len,
-        notify.cap.cap_len - PCI_CAP_FLAGS);
-}
 
 static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
     .base_name             = TYPE_VIRTIO_NET_PCI,
