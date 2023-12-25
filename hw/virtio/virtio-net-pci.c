@@ -27,7 +27,7 @@
 #include "hw/pci/msix.h"
 
 typedef struct VirtIONetPCI VirtIONetPCI;
-typedef struct VirtIONetVfPCI VirtIONetVfPCI;
+typedef struct VirtIONetPCI VirtIONetVfPCI;
 //static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info;
 /*
  * virtio-net-pci: This extends VirtioPCIProxy.
@@ -46,9 +46,9 @@ struct VirtIONetPCI {
     VirtIONet vdev;
 };
 
-struct VirtIONetVfPCI {
-    VirtIONetPCI virtio_vf;
-};
+//struct VirtIONetVfPCI {
+//    VirtIONetPCI virtio_vf;
+//};
 
 static Property virtio_net_properties[] = {
     DEFINE_PROP_BIT("ioeventfd", VirtIOPCIProxy, flags,
@@ -333,9 +333,9 @@ static void virtio_net_pci_instance_init(Object *obj)
 {
     VirtIONetVfPCI *dev = VIRTIO_NET_PCI_VF(obj);
 
-    virtio_instance_init_common(obj, &dev->virtio_vf.vdev, sizeof(dev->virtio_vf.vdev),
+    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
                                 TYPE_VIRTIO_NET);
-    object_property_add_alias(obj, "bootindex", OBJECT(&dev->virtio_vf.vdev),
+    object_property_add_alias(obj, "bootindex", OBJECT(&dev->vdev),
                               "bootindex");
 }
 
