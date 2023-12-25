@@ -332,27 +332,15 @@ static uint64_t virtio_pci_device_read(void *opaque, hwaddr addr,
 }
 */
 
+static void virtio_net_pci_instance_init(Object *obj)
+{
+    VirtIONetPCI *dev = VIRTIO_NET_PCI(obj);
 
-
-static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
-    .base_name             = TYPE_VIRTIO_NET_PCI,
-    .generic_name          = "virtio-net-pci",
-    .transitional_name     = "virtio-net-pci-transitional",
-    .non_transitional_name = "virtio-net-pci-non-transitional",
-    .instance_size = sizeof(VirtIONetPCI),
-    .instance_init = virtio_net_pci_instance_init,
-    .class_init    = virtio_net_pci_class_init,
-};
-
-static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info = {
-    .base_name             = TYPE_VIRTIO_NET_PCI,
-    .generic_name          = "virtio-net-pci-vf",
-    .transitional_name     = "virtio-net-pci-vf-transitional",
-    .non_transitional_name = "virtio-net-pci-vf-non-transitional",
-    .instance_size = sizeof(VirtIONetPCI),
-    .instance_init = virtio_net_pci_instance_init,
-    .class_init    = virtio_net_pci_vf_class_init,
-};
+    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
+                                TYPE_VIRTIO_NET);
+    object_property_add_alias(obj, "bootindex", OBJECT(&dev->vdev),
+                              "bootindex");
+}
 
 static void virtio_net_pci_class_init(ObjectClass *klass, void *data)
 {
@@ -366,7 +354,7 @@ static void virtio_net_pci_class_init(ObjectClass *klass, void *data)
     k->revision = VIRTIO_PCI_ABI_VERSION;
     k->class_id = PCI_CLASS_NETWORK_ETHERNET;
     set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
-    device_class_set_props(dc, virtio_net_properties);
+    //device_class_set_props(dc, virtio_net_properties);
     vpciklass->realize = virtio_net_pci_realize;
 }
 
@@ -391,15 +379,25 @@ static void virtio_net_pci_vf_class_init(ObjectClass *klass, void *data)
     set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
 }
 
-static void virtio_net_pci_instance_init(Object *obj)
-{
-    VirtIONetPCI *dev = VIRTIO_NET_PCI(obj);
+static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
+    .base_name             = TYPE_VIRTIO_NET_PCI,
+    .generic_name          = "virtio-net-pci",
+    .transitional_name     = "virtio-net-pci-transitional",
+    .non_transitional_name = "virtio-net-pci-non-transitional",
+    .instance_size = sizeof(VirtIONetPCI),
+    .instance_init = virtio_net_pci_instance_init,
+    .class_init    = virtio_net_pci_class_init,
+};
 
-    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
-                                TYPE_VIRTIO_NET);
-    object_property_add_alias(obj, "bootindex", OBJECT(&dev->vdev),
-                              "bootindex");
-}
+static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info = {
+    .base_name             = TYPE_VIRTIO_NET_PCI,
+    .generic_name          = "virtio-net-pci-vf",
+    .transitional_name     = "virtio-net-pci-vf-transitional",
+    .non_transitional_name = "virtio-net-pci-vf-non-transitional",
+    .instance_size = sizeof(VirtIONetPCI),
+    .instance_init = virtio_net_pci_instance_init,
+    .class_init    = virtio_net_pci_vf_class_init,
+};
 
 static void virtio_net_pci_register(void)
 {
