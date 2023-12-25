@@ -331,11 +331,11 @@ static uint64_t virtio_pci_device_read(void *opaque, hwaddr addr,
 
 static void virtio_net_pci_instance_init(Object *obj)
 {
-    VirtIONetPCI *dev = VIRTIO_NET_PCI(obj);
+    VirtIONetVfPCI *dev = VIRTIO_NET_PCI_VF(obj);
 
-    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
+    virtio_instance_init_common(obj, &dev->virtio_vf.vdev, sizeof(dev->virtio_vf.vdev),
                                 TYPE_VIRTIO_NET);
-    object_property_add_alias(obj, "bootindex", OBJECT(&dev->vdev),
+    object_property_add_alias(obj, "bootindex", OBJECT(&dev->virtio_vf.vdev),
                               "bootindex");
 }
 
