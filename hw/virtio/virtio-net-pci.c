@@ -28,6 +28,7 @@
 
 typedef struct VirtIONetPCI VirtIONetPCI;
 typedef struct VirtIONetVfPCI VirtIONetVfPCI;
+static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info;
 /*
  * virtio-net-pci: This extends VirtioPCIProxy.
  */
@@ -388,7 +389,7 @@ static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
     .class_init    = virtio_net_pci_class_init,
 };
 
-static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info = {
+virtio_net_pci_vf_info = {
     .base_name             = TYPE_VIRTIO_NET_PCI,
     .generic_name          = "virtio-net-pci-vf",
     .transitional_name     = "virtio-net-pci-vf-transitional",
