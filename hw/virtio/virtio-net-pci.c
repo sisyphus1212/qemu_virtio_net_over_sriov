@@ -241,9 +241,9 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_DEVICE_CFG, 0x2000, 0x4, 0x1000);
-    //virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_NOTIFY_CFG, 0x3000, 0x4, 0x1000);
+    virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_NOTIFY_CFG, 0x3000, 0x4, 0x1000);
 
-    virtio_net_vf_pci_notify_cap_init(dev, 0x3000, 0x4, 4, 0x1000);
+    //virtio_net_vf_pci_notify_cap_init(dev, 0x3000, 0x4, 4, 0x1000);
 
     ret = msix_init(dev, nvectors, &vf_proxy->pci_dev.msix_exclusive_bar, msix_bar_id,
                     0, &vf_proxy->pci_dev.msix_exclusive_bar,
