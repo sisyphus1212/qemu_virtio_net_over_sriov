@@ -28,7 +28,7 @@
 
 typedef struct VirtIONetPCI VirtIONetPCI;
 typedef struct VirtIONetVfPCI VirtIONetVfPCI;
-static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info;
+//static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info;
 /*
  * virtio-net-pci: This extends VirtioPCIProxy.
  */
@@ -374,7 +374,7 @@ static void virtio_net_pci_vf_class_init(ObjectClass *klass, void *data)
     rc->phases.hold = virtio_net_pci_vf_qdev_reset_hold;
     dc->desc = "virtio net pci virtual function";
     dc->user_creatable = false;
-    device_class_set_props(dc, virtio_net_pci_vf_info);
+    //device_class_set_props(dc, virtio_net_pci_vf_info);
     vpciklass->realize = virtio_net_pci_vf_realize;
     set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
 }
@@ -389,7 +389,7 @@ static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
     .class_init    = virtio_net_pci_class_init,
 };
 
-virtio_net_pci_vf_info = {
+static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info = {
     .base_name             = TYPE_VIRTIO_NET_PCI,
     .generic_name          = "virtio-net-pci-vf",
     .transitional_name     = "virtio-net-pci-vf-transitional",
