@@ -286,7 +286,7 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
 
 static void virtio_net_pci_vf_pci_uninit(PCIDevice *dev)
 {
-    VirtIONetVfPCI *s = VIRTIO_NET_PCI_VF(dev);
+    //VirtIONetVfPCI *s = VIRTIO_NET_PCI_VF(dev);
 
     pcie_aer_exit(dev);
     pcie_cap_exit(dev);
