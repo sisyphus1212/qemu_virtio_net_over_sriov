@@ -246,8 +246,8 @@ static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
     //    VIRTIO_NET_VF_MSIX_SIZE);
     //pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
 
-    char* name = g_strdup_printf("%s-msix", vf_proxy->name);
-    memory_region_init(&vf_proxy->msix_exclusive_bar, OBJECT(vf_proxy), name, VIRTIO_NET_VF_MSIX_SIZE);
+    char* name = g_strdup_printf("%s-msix", vf_proxy->pci_dev.name);
+    memory_region_init(&vf_proxy->pci_dev.msix_exclusive_bar, OBJECT(vf_proxy), name, VIRTIO_NET_VF_MSIX_SIZE);
     //memcpy(vf_proxy->regs, pf_proxy->regs, sizeof(pf_proxy->regs));
 
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
@@ -257,8 +257,8 @@ static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
 
     virtio_net_vf_pci_notify_cap_init(dev, 0x3000, 0x4, 4, 0x1000);
 
-    ret = msix_init(dev, nvectors, &vf_proxy->msix_exclusive_bar, msix_bar_id,
-                    0, &vf_proxy->msix_exclusive_bar,
+    ret = msix_init(dev, nvectors, &vf_proxy->pci_dev.msix_exclusive_bar, msix_bar_id,
+                    0, &vf_proxy->pci_dev.msix_exclusive_bar,
                     mmio_bar_id, 0x2000,
                     0x00, errp);
     if (ret) {
@@ -299,55 +299,6 @@ static void virtio_net_pci_vf_qdev_reset_hold(Object *obj)
 {
     //PCIDevice *vf = PCI_DEVICE(obj);
     //igb_vf_reset(pcie_sriov_get_pf(vf), pcie_sriov_vf_number(vf));
-}
-
-
-
-static void virtio_net_pci_class_init(ObjectClass *klass, void *data)
-{
-    DeviceClass *dc = DEVICE_CLASS(klass);
-    PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
-    VirtioPCIClass *vpciklass = VIRTIO_PCI_CLASS(klass);
-
-    k->romfile = "efi-virtio.rom";
-    k->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
-    k->device_id = PCI_DEVICE_ID_VIRTIO_NET;
-    k->revision = VIRTIO_PCI_ABI_VERSION;
-    k->class_id = PCI_CLASS_NETWORK_ETHERNET;
-    set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
-    device_class_set_props(dc, virtio_net_properties);
-    vpciklass->realize = virtio_net_pci_realize;
-}
-
-static void virtio_net_pci_vf_class_init(ObjectClass *klass, void *data)
-{
-    DeviceClass *dc = DEVICE_CLASS(klass);
-    PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
-    VirtioPCIClass *vpciklass = VIRTIO_PCI_CLASS(klass);
-    ResettableClass *rc = RESETTABLE_CLASS(klass);
-
-    k->romfile = "efi-virtio.rom";
-    k->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
-    k->device_id = PCI_DEVICE_ID_VIRTIO_NET;
-    k->revision = VIRTIO_PCI_ABI_VERSION;
-    k->class_id = PCI_CLASS_NETWORK_ETHERNET;
-    k->exit = virtio_net_pci_vf_pci_uninit;
-    rc->phases.hold = virtio_net_pci_vf_qdev_reset_hold;
-    dc->desc = "virtio net pci virtual function";
-    dc->user_creatable = false;
-    device_class_set_props(dc, virtio_net_pci_vf_info);
-    vpciklass->realize = virtio_net_pci_vf_realize;
-    set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
-}
-
-static void virtio_net_pci_instance_init(Object *obj)
-{
-    VirtIONetPCI *dev = VIRTIO_NET_PCI(obj);
-
-    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
-                                TYPE_VIRTIO_NET);
-    object_property_add_alias(obj, "bootindex", OBJECT(&dev->vdev),
-                              "bootindex");
 }
 
 
@@ -402,6 +353,53 @@ static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info = {
     .instance_init = virtio_net_pci_instance_init,
     .class_init    = virtio_net_pci_vf_class_init,
 };
+
+static void virtio_net_pci_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
+    VirtioPCIClass *vpciklass = VIRTIO_PCI_CLASS(klass);
+
+    k->romfile = "efi-virtio.rom";
+    k->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
+    k->device_id = PCI_DEVICE_ID_VIRTIO_NET;
+    k->revision = VIRTIO_PCI_ABI_VERSION;
+    k->class_id = PCI_CLASS_NETWORK_ETHERNET;
+    set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
+    device_class_set_props(dc, virtio_net_properties);
+    vpciklass->realize = virtio_net_pci_realize;
+}
+
+static void virtio_net_pci_vf_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
+    VirtioPCIClass *vpciklass = VIRTIO_PCI_CLASS(klass);
+    ResettableClass *rc = RESETTABLE_CLASS(klass);
+
+    k->romfile = "efi-virtio.rom";
+    k->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
+    k->device_id = PCI_DEVICE_ID_VIRTIO_NET;
+    k->revision = VIRTIO_PCI_ABI_VERSION;
+    k->class_id = PCI_CLASS_NETWORK_ETHERNET;
+    k->exit = virtio_net_pci_vf_pci_uninit;
+    rc->phases.hold = virtio_net_pci_vf_qdev_reset_hold;
+    dc->desc = "virtio net pci virtual function";
+    dc->user_creatable = false;
+    device_class_set_props(dc, virtio_net_pci_vf_info);
+    vpciklass->realize = virtio_net_pci_vf_realize;
+    set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
+}
+
+static void virtio_net_pci_instance_init(Object *obj)
+{
+    VirtIONetPCI *dev = VIRTIO_NET_PCI(obj);
+
+    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
+                                TYPE_VIRTIO_NET);
+    object_property_add_alias(obj, "bootindex", OBJECT(&dev->vdev),
+                              "bootindex");
+}
 
 static void virtio_net_pci_register(void)
 {
