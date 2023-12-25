@@ -329,9 +329,19 @@ static uint64_t virtio_pci_device_read(void *opaque, hwaddr addr,
 }
 */
 
-static void virtio_net_pci_instance_init(Object *obj)
+static void virtio_net_pci_vf_instance_init(Object *obj)
 {
     VirtIONetVfPCI *dev = VIRTIO_NET_PCI_VF(obj);
+
+    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
+                                TYPE_VIRTIO_NET);
+    object_property_add_alias(obj, "bootindex", OBJECT(&dev->vdev),
+                              "bootindex");
+}
+
+static void virtio_net_pci_instance_init(Object *obj)
+{
+    VirtIONetPCI *dev = VIRTIO_NET_PCI(obj);
 
     virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
                                 TYPE_VIRTIO_NET);
@@ -392,7 +402,7 @@ static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info = {
     .transitional_name     = "virtio-net-pci-vf-transitional",
     .non_transitional_name = "virtio-net-pci-vf-non-transitional",
     .instance_size = sizeof(VirtIONetVfPCI),
-    .instance_init = virtio_net_pci_instance_init,
+    .instance_init = virtio_net_pci_vf_instance_init,
     .class_init    = virtio_net_pci_vf_class_init,
 };
 
