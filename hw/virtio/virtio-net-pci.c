@@ -36,7 +36,7 @@ typedef struct VirtIONetVfPCI VirtIONetVfPCI;
 DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI,
                          TYPE_VIRTIO_NET_PCI)
 
-#define TYPE_VIRTIO_NET_PCI_VF "virtio-net-pci-vf"
+#define TYPE_VIRTIO_NET_PCI_VF "virtio-net-pci-vf-base"
 DECLARE_INSTANCE_CHECKER(VirtIONetVfPCI, VIRTIO_NET_PCI_VF,
                          TYPE_VIRTIO_NET_PCI_VF)
 
