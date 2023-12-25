@@ -239,13 +239,8 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
         VIRTIO_NET_VF_MMIO_SIZE);
     pcie_sriov_vf_register_bar(dev, mmio_bar_id, &vf_proxy->modern_bar);
 
-    //memory_region_init(&s->msix, OBJECT(dev), "virtio_net_pci_vf-msix",
-    //    VIRTIO_NET_VF_MSIX_SIZE);
-    //pcie_sriov_vf_register_bar(dev, msix_bar_id, &s->msix);
-
     char* name = g_strdup_printf("%s-msix", vf_proxy->pci_dev.name);
     memory_region_init(&vf_proxy->pci_dev.msix_exclusive_bar, OBJECT(vf_proxy), name, VIRTIO_NET_VF_MSIX_SIZE);
-    //memcpy(vf_proxy->regs, pf_proxy->regs, sizeof(pf_proxy->regs));
 
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
     virtio_net_vf_pci_cap_init(dev, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
