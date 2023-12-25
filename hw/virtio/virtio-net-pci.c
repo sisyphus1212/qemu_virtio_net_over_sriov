@@ -34,9 +34,13 @@ typedef struct VirtIONetPCI VirtIONetPCI;
 DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI,
                          TYPE_VIRTIO_NET_PCI)
 
-#define TYPE_VIRTIONETVF "virtio-net-vf"
-OBJECT_DECLARE_SIMPLE_TYPE(VirtIONetVfPCI, VIRTIONETVF)
-#define VIRTIONETVF(obj) OBJECT_CHECK(VirtIONetVfPCI, (obj), TYPE_VIRTIONETVF)
+#define TYPE_VIRTIO_NET_PCI_VF "virtio-net-pci-vf"
+DECLARE_INSTANCE_CHECKER(VirtIONetVfPCI, VIRTIO_NET_PCI_VF,
+                         TYPE_VIRTIO_NET_PCI_VF)
+
+//#define TYPE_VIRTIO_NET_PCI_VF "virtio-net-pci-vf"
+//OBJECT_DECLARE_SIMPLE_TYPE(VirtIONetVfPCI, VIRTIO_NET_PCI_VF)
+//#define VIRTIO_NET_PCI_VF(obj) OBJECT_CHECK(VirtIONetVfPCI, (obj), TYPE_VIRTIO_NET_PCI_VF)
 
 struct VirtIONetPCI {
     VirtIOPCIProxy parent_obj;
@@ -82,7 +86,7 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     PCIDevice *pci_dev = &vpci_dev->pci_dev;
     pcie_ari_init(pci_dev, VIRTIO_NET_CAP_ARI_OFFSET);
 
-    pcie_sriov_pf_init(pci_dev, VIRTIO_NET_CAP_SRIOV_OFFSET, TYPE_VIRTIONETVF,
+    pcie_sriov_pf_init(pci_dev, VIRTIO_NET_CAP_SRIOV_OFFSET, TYPE_VIRTIO_NET_PCI_VF,
         VIRTIO_NET_VF_DEV_ID, 8, 8,
         VIRTIO_NET_VF_OFFSET, VIRTIO_NET_VF_STRIDE);
 
@@ -278,7 +282,7 @@ static void virtio_net_pci_vf_realize(PCIDevice *dev, Error **errp)
 
 static void virtio_net_pci_vf_pci_uninit(PCIDevice *dev)
 {
-    VirtIONetVfPCI *s = VIRTIONETVF(dev);
+    VirtIONetVfPCI *s = VIRTIO_NET_PCI_VF(dev);
 
     pcie_aer_exit(dev);
     pcie_cap_exit(dev);
