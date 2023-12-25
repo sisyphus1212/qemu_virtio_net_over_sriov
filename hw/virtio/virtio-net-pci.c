@@ -46,10 +46,6 @@ struct VirtIONetPCI {
     VirtIONet vdev;
 };
 
-//struct VirtIONetVfPCI {
-//    VirtIONetPCI virtio_vf;
-//};
-
 static Property virtio_net_properties[] = {
     DEFINE_PROP_BIT("ioeventfd", VirtIOPCIProxy, flags,
                     VIRTIO_PCI_FLAG_USE_IOEVENTFD_BIT, true),
@@ -261,7 +257,7 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
         msix_vector_use(dev, i);
     }
 
-    if (pcie_endpoint_cap_init(dev, 0xa0) < 0) {
+    if (pcie_endpoint_cap_init(dev, 0) < 0) {
         herror("Failed to initialize PCIe capability");
     }
 
