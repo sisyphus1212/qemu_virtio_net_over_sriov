@@ -223,7 +223,7 @@ static void virtio_net_pci_vf_write_config(PCIDevice *dev, uint32_t addr, uint32
 static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
 {
     VirtIONetVfPCI *s = VIRTIO_NET_PCI_VF(vdev);
-    int ret;
+    //int ret;
     int i;
     PCIDevice *dev = (PCIDevice *)vdev;
     dev->config_write = virtio_net_pci_vf_write_config;
