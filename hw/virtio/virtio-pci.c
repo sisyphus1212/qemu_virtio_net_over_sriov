@@ -2233,112 +2233,6 @@ static void virtio_pci_device_plugged(DeviceState *d, Error **errp)
     }
 }
 
-void virtio_net_pci_vf_pci_cap_init(VirtIOPCIProxy *proxy, PCIDevice *dev) {
-    struct virtio_pci_cap cap = {
-        .cap_len = sizeof cap,
-    };
-
-    struct virtio_pci_notify_cap notify = {
-        .cap.cap_len = sizeof notify,
-        .notify_off_multiplier =
-            cpu_to_le32(virtio_pci_queue_mem_mult(proxy)),
-        .cap.offset = 0x3000,
-        .cap.length = virtio_pci_queue_mem_mult(proxy) * VIRTIO_QUEUE_MAX,
-        .cap.cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG,
-        .cap.bar = 4,
-    };
-
-    struct virtio_pci_cfg_cap cfg = {
-        .cap.cap_len = sizeof cfg,
-        .cap.cfg_type = VIRTIO_PCI_CAP_PCI_CFG,
-    };
-
-    struct virtio_pci_cap common_cfg = {
-        .cap_len = sizeof common_cfg,
-        .cfg_type = 2,
-        .offset = 0x0,
-        .length = 0x1000,
-        .bar = 4,
-    };
-    struct virtio_pci_cap isr_cfg = {
-        .cap_len = sizeof isr_cfg,
-        .cfg_type = 2,
-        .offset = 0x1000,
-        .length = 0x1000,
-        .bar = 4,
-    };
-
-    struct virtio_pci_cap device_cfg = {
-        .cap_len = sizeof device_cfg,
-        .cfg_type = 0x2,
-        .offset = 0x2000,
-        .length = 0x1000,
-        .bar = 4,
-    };
-
-    struct virtio_pci_cap notify_cfg = {
-        .cap_len = sizeof notify_cfg,
-        .cfg_type = VIRTIO_PCI_CAP_NOTIFY_CFG,
-    };
-    /*
-        proxy->isr.offset = 0x1000;
-        proxy->isr.size = 0x1000;
-        proxy->isr.type = VIRTIO_PCI_CAP_ISR_CFG;
-
-        proxy->device.offset = 0x2000;
-        proxy->device.size = 0x1000;
-        proxy->device.type = VIRTIO_PCI_CAP_DEVICE_CFG;
-
-        proxy->notify.offset = 0x3000;
-        proxy->notify.size = virtio_pci_queue_mem_mult(proxy) * VIRTIO_QUEUE_MAX;
-        proxy->notify.type = VIRTIO_PCI_CAP_NOTIFY_CFG;
-
-        proxy->notify_pio.offset = 0x0;
-        proxy->notify_pio.size = 0x4;
-        proxy->notify_pio.type = VIRTIO_PCI_CAP_NOTIFY_CFG;
-    */
-
-    /*
-        struct virtio_pci_notify_cap notify_pio = {
-        .cap.cap_len = sizeof notify,
-        .notify_off_multiplier = cpu_to_le32(0x0),
-    };
-
-    struct virtio_pci_cfg_cap *cfg_mask;
-    */
-
-
-    //VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
-    virtio_pci_vf_modern_regions_init(proxy, dev, "vf");
-
-    virtio_pci_vf_modern_region_map(dev, &proxy->device, &device_cfg, &proxy->modern_bar, device_cfg.bar);
-    //virtio_pci_vf_modern_region_map(dev, &proxy->common, &common_cfg, &proxy->modern_bar, common_cfg.bar);
-    //virtio_pci_vf_modern_region_map(dev, &proxy->isr,    &isr_cfg,    &proxy->modern_bar, isr_cfg.bar);
-
-    //virtio_pci_vf_modern_region_map(dev, &proxy->notify, &notify_cfg, &proxy->modern_bar, notify_cfg.bar);
-
-/*
-    memory_region_init(&proxy->io_bar, OBJECT(proxy),
-                        "virtio-pci-io", 0x4);
-
-    pcie_sriov_vf_register_bar(&proxy->pci_dev, proxy->modern_io_bar_idx,
-                              &proxy->io_bar);
-
-    virtio_pci_modern_io_region_map(proxy, &proxy->notify_pio,
-                                    &notify_pio.cap);
-
-    pcie_sriov_vf_register_bar(&proxy->pci_dev, proxy->modern_mem_bar_idx,
-                        &proxy->modern_bar);
-
-    proxy->config_cap = virtio_pci_add_mem_cap(proxy, &cfg.cap);
-    cfg_mask = (void *)(proxy->pci_dev.wmask + proxy->config_cap);
-    pci_set_byte(&cfg_mask->cap.bar, ~0x0);
-    pci_set_long((uint8_t *)&cfg_mask->cap.offset, ~0x0);
-    pci_set_long((uint8_t *)&cfg_mask->cap.length, ~0x0);
-    pci_set_long(cfg_mask->pci_cfg_data, ~0x0);
-*/
-}
-
 static void virtio_pci_device_unplugged(DeviceState *d)
 {
     VirtIOPCIProxy *proxy = VIRTIO_PCI(d);
@@ -2563,6 +2457,7 @@ static Property virtio_pci_properties[] = {
                     VIRTIO_PCI_FLAG_INIT_FLR_BIT, true),
     DEFINE_PROP_BIT("aer", VirtIOPCIProxy, flags,
                     VIRTIO_PCI_FLAG_AER_BIT, false),
+    DEFINE_PROP_UINT16("sriov_max_vfs", VirtIOPCIProxy, sriov_max_vfs, 0),
     DEFINE_PROP_END_OF_LIST(),
 };
 

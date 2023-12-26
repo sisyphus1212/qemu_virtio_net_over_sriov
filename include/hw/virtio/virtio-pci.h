@@ -158,6 +158,7 @@ struct VirtIOPCIProxy {
     uint32_t dfselect;
     uint32_t gfselect;
     uint32_t guest_features[2];
+    uint16_t sriov_max_vfs;
     VirtIOPCIQueue vqs[VIRTIO_QUEUE_MAX];
 
     VirtIOIRQFD *vector_irqfd;
