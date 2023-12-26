@@ -78,21 +78,6 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     virtio_net_set_netclient_name(&dev->vdev, qdev->id,
                                   object_get_typename(OBJECT(qdev)));
 
-    PCIDevice *pci_dev = &vpci_dev->pci_dev;
-    pcie_ari_init(pci_dev, VIRTIO_NET_CAP_ARI_OFFSET);
-
-    pcie_sriov_pf_init(pci_dev, VIRTIO_NET_CAP_SRIOV_OFFSET, TYPE_VIRTIO_NET_PCI_VF_GENERIC,
-        VIRTIO_NET_VF_DEV_ID, 8, 8,
-        VIRTIO_NET_VF_OFFSET, VIRTIO_NET_VF_STRIDE);
-
-    pcie_sriov_pf_init_vf_bar(pci_dev, vpci_dev->modern_mem_bar_idx,
-        PCI_BASE_ADDRESS_MEM_TYPE_64 | PCI_BASE_ADDRESS_MEM_PREFETCH,
-        VIRTIO_NET_VF_MMIO_SIZE);
-
-    pcie_sriov_pf_init_vf_bar(pci_dev, vpci_dev->msix_bar_idx,
-        PCI_BASE_ADDRESS_MEM_TYPE_64 | PCI_BASE_ADDRESS_MEM_PREFETCH,
-        VIRTIO_NET_VF_MSIX_SIZE);
-
     qdev_realize(vdev, BUS(&vpci_dev->bus), errp);
 }
 
