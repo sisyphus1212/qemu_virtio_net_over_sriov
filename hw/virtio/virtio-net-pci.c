@@ -119,6 +119,34 @@ static void virtio_pci_device_write(void *opaque, hwaddr addr,
     }
 }
 
+static uint64_t virtio_pci_device_read(void *opaque, hwaddr addr,
+                                       unsigned size)
+{
+    VirtIOPCIProxy *proxy = opaque;
+    VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
+    uint64_t val;
+
+    if (vdev == NULL) {
+        return UINT64_MAX;
+    }
+
+    switch (size) {
+    case 1:
+        val = virtio_config_modern_readb(vdev, addr);
+        break;
+    case 2:
+        val = virtio_config_modern_readw(vdev, addr);
+        break;
+    case 4:
+        val = virtio_config_modern_readl(vdev, addr);
+        break;
+    default:
+        val = 0;
+        break;
+    }
+    return val;
+}
+
 static uint64_t virtio_net_pci_vf_mmio_read(void *opaque, hwaddr addr, unsigned size)
 {
     return virtio_pci_device_read(opaque, addr, size);
@@ -278,34 +306,6 @@ static void virtio_net_pci_vf_qdev_reset_hold(Object *obj)
 {
     //PCIDevice *vf = PCI_DEVICE(obj);
     //igb_vf_reset(pcie_sriov_get_pf(vf), pcie_sriov_vf_number(vf));
-}
-
-static uint64_t virtio_pci_device_read(void *opaque, hwaddr addr,
-                                       unsigned size)
-{
-    VirtIOPCIProxy *proxy = opaque;
-    VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
-    uint64_t val;
-
-    if (vdev == NULL) {
-        return UINT64_MAX;
-    }
-
-    switch (size) {
-    case 1:
-        val = virtio_config_modern_readb(vdev, addr);
-        break;
-    case 2:
-        val = virtio_config_modern_readw(vdev, addr);
-        break;
-    case 4:
-        val = virtio_config_modern_readl(vdev, addr);
-        break;
-    default:
-        val = 0;
-        break;
-    }
-    return val;
 }
 
 static void virtio_net_pci_vf_instance_init(Object *obj)
