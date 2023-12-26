@@ -36,6 +36,8 @@ typedef struct VirtIONetPCI VirtIONetPCI;
 DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI,
                          TYPE_VIRTIO_NET_PCI)
 
+#define VIRTIO_MAX_VFS 127
+
 struct VirtIONetPCI {
     VirtIOPCIProxy parent_obj;
     VirtIONet vdev;
