@@ -258,9 +258,9 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vdev, Error **errp)
         msix_vector_use(dev, i);
     }
 
-    if (pcie_endpoint_cap_init(dev, 0) < 0) {
-        herror("Failed to initialize PCIe capability");
-    }
+    //if (pcie_endpoint_cap_init(dev, 0) < 0) {
+    //    herror("Failed to initialize PCIe capability");
+    //}
 
     if (object_property_get_bool(OBJECT(pcie_sriov_get_pf(dev)),
                                  "x-pcie-flr-init", &error_abort)) {
