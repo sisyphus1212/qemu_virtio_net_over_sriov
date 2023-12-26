@@ -247,7 +247,7 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
 {
     int ret;
     int i;
-    VirtIONetVfPCI *dev = (VirtIONetVfPCI *)VIRTIO_NET_PCI(vpci_dev);
+    VirtIONetVfPCI *dev = VIRTIO_NET_PCI_VF(vpci_dev);
     DeviceState *qdev = DEVICE(vpci_dev);
     DeviceState *vdev = DEVICE(&dev->vdev);
     //VirtIONet *net = VIRTIO_NET(vdev);
