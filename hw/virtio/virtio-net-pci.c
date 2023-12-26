@@ -195,6 +195,7 @@ static const MemoryRegionOps mmio_ops = {
     },
 };
 
+/*
 static void virtio_net_vf_pci_cap_init(PCIDevice *dev, uint8_t cfg_type,
                                 uint32_t cfg_offset, uint8_t cfg_bar,
                                 int cfg_length) {
@@ -212,6 +213,8 @@ static void virtio_net_vf_pci_cap_init(PCIDevice *dev, uint8_t cfg_type,
     memcpy(dev->config + offset + PCI_CAP_FLAGS, &cap.cap_len,
         cap.cap_len - PCI_CAP_FLAGS);
 }
+*/
+
 /*
 static void virtio_net_vf_pci_notify_cap_init(PCIDevice *dev,
                                 uint32_t cfg_offset, uint8_t cfg_bar,
