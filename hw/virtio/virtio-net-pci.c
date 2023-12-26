@@ -269,10 +269,10 @@ static void virtio_net_pci_vf_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     char* name = g_strdup_printf("%s-msix", vpci_dev->pci_dev.name);
     memory_region_init(&vpci_dev->pci_dev.msix_exclusive_bar, OBJECT(vpci_dev), name, VIRTIO_NET_VF_MSIX_SIZE);
 
-    virtio_net_vf_pci_cap_init(vf, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
-    virtio_net_vf_pci_cap_init(vf, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
-    virtio_net_vf_pci_cap_init(vf, VIRTIO_PCI_CAP_DEVICE_CFG, 0x2000, 0x4, 0x1000);
-    virtio_net_vf_pci_notify_cap_init(vf, 0x3000, 0x4, 4, 0x1000);
+    //virtio_net_vf_pci_cap_init(vf, VIRTIO_PCI_CAP_COMMON_CFG, 0x0,    0x4, 0x1000);
+    //virtio_net_vf_pci_cap_init(vf, VIRTIO_PCI_CAP_ISR_CFG,    0x1000, 0x4, 0x1000);
+    //virtio_net_vf_pci_cap_init(vf, VIRTIO_PCI_CAP_DEVICE_CFG, 0x2000, 0x4, 0x1000);
+    //virtio_net_vf_pci_notify_cap_init(vf, 0x3000, 0x4, 4, 0x1000);
 
     ret = msix_init(vf, nvectors, &vpci_dev->pci_dev.msix_exclusive_bar, msix_bar_id,
                     0, &vpci_dev->pci_dev.msix_exclusive_bar,
