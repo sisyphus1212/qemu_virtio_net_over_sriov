@@ -46,6 +46,7 @@
 
 #undef VIRTIO_PCI_CONFIG
 
+#define VIRTIO_MAX_VFS 127
 /* The remaining space is defined by each driver as the per-driver
  * configuration space */
 #define VIRTIO_PCI_CONFIG_SIZE(dev)     VIRTIO_PCI_CONFIG_OFF(msix_enabled(dev))
