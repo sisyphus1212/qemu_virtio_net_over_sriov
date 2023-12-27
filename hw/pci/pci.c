@@ -2353,9 +2353,9 @@ static void pci_add_option_rom(PCIDevice *pdev, bool is_default_rom,
         return;
     }
 
-    if (pci_is_vf(pdev)) {
-        return;
-    }
+    //if (pci_is_vf(pdev)) {
+    //    return;
+    //}
 
     if (!pdev->rom_bar) {
         /*

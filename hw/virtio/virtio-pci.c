@@ -49,7 +49,7 @@
  * configuration space */
 #define VIRTIO_PCI_CONFIG_SIZE(dev)     VIRTIO_PCI_CONFIG_OFF(msix_enabled(dev))
 
-#define VIRTIO_MAX_VFS 127
+#define VIRTIO_MAX_VFS 255
 
 static void virtio_pci_bus_new(VirtioBusState *bus, size_t bus_size,
                                VirtIOPCIProxy *dev);
@@ -1045,7 +1045,7 @@ static void virtio_pci_one_vector_mask(VirtIOPCIProxy *proxy,
 
     /* If guest supports masking, keep irqfd but mask it.
      * Otherwise, clean it up now.
-     */ 
+     */
     if (vdev->use_guest_notifier_mask && k->guest_notifier_mask) {
         k->guest_notifier_mask(vdev, queue_no, true);
     } else {
@@ -2023,11 +2023,6 @@ static void virtio_pci_device_plugged(DeviceState *d, Error **errp)
         virtio_pci_modern_mem_region_map(proxy, &proxy->notify, &notify.cap);
 
         if (!pci_is_vf(&proxy->pci_dev) && proxy->sriov_max_vfs) {
-            if (virtio_bus_get_vdev_id(bus) != VIRTIO_ID_NET) {
-                error_setg(errp, "sriov_max_vfs prop is not supported by %s",
-                           proxy->pci_dev.name);
-                return;
-            }
             if (proxy->sriov_max_vfs > VIRTIO_MAX_VFS) {
                 error_setg(errp, "sriov_max_vfs must be between 0 and %d",
                            VIRTIO_MAX_VFS);
@@ -2039,10 +2034,6 @@ static void virtio_pci_device_plugged(DeviceState *d, Error **errp)
                                PCI_DEVICE_ID_VIRTIO_10_BASE
                                + virtio_bus_get_vdev_id(bus),
                                proxy->sriov_max_vfs, proxy->sriov_max_vfs, 1, 1);
-            if (proxy->flags & VIRTIO_PCI_FLAG_MODERN_PIO_NOTIFY) {
-                pcie_sriov_pf_init_vf_bar(&proxy->pci_dev, proxy->modern_io_bar_idx,
-                                          PCI_BASE_ADDRESS_SPACE_IO, 4);
-            }
             if (proxy->nvectors) {
                 pcie_sriov_pf_init_vf_bar(&proxy->pci_dev, proxy->msix_bar_idx,
                                           PCI_BASE_ADDRESS_SPACE_MEMORY, 4 * 1024);
@@ -2054,14 +2045,9 @@ static void virtio_pci_device_plugged(DeviceState *d, Error **errp)
                                       16 * 1024);
         }
 
-        if (modern_pio) {
+        if (modern_pio && !pci_is_vf(&proxy->pci_dev)) {
             memory_region_init(&proxy->io_bar, OBJECT(proxy),
                                "virtio-pci-io", 0x4);
-
-            if (pci_is_vf(&proxy->pci_dev))
-                pcie_sriov_vf_register_bar(&proxy->pci_dev, proxy->modern_io_bar_idx,
-                                           &proxy->io_bar);
-            else
                 pci_register_bar(&proxy->pci_dev, proxy->modern_io_bar_idx,
                                  PCI_BASE_ADDRESS_SPACE_IO, &proxy->io_bar);
 
