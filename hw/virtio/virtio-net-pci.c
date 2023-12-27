@@ -52,9 +52,6 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     VirtIONetPCI *dev = VIRTIO_NET_PCI(vpci_dev);
     DeviceState *vdev = DEVICE(&dev->vdev);
     VirtIONet *net = VIRTIO_NET(vdev);
-    if (vpci_dev->pci_dev.exp.sriov_vf.pf != NULL){
-        vpci_dev->pci_dev.romfile = NULL;
-    }
     if (vpci_dev->nvectors == DEV_NVECTORS_UNSPECIFIED) {
         vpci_dev->nvectors = 2 * MAX(net->nic_conf.peers.queues, 1)
             + 1 /* Config interrupt */
@@ -64,6 +61,9 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     virtio_net_set_netclient_name(&dev->vdev, qdev->id,
                                   object_get_typename(OBJECT(qdev)));
     qdev_realize(vdev, BUS(&vpci_dev->bus), errp);
+    if (vpci_dev->pci_dev.exp.sriov_vf.pf != NULL){
+        vpci_dev->pci_dev.romfile = NULL;
+    }
 }
 
 static void virtio_net_pci_class_init(ObjectClass *klass, void *data)
