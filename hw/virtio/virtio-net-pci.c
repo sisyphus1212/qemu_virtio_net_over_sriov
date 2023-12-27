@@ -49,11 +49,35 @@ static Property virtio_net_properties[] = {
     DEFINE_PROP_END_OF_LIST(),
 };
 
+static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
+{
+    DeviceState *qdev = DEVICE(vpci_dev);
+    VirtIONetPCI *dev = VIRTIO_NET_PCI(vpci_dev);
+    DeviceState *vdev = DEVICE(&dev->vdev);
+    VirtIONet *net = VIRTIO_NET(vdev);
+
+    if (vpci_dev->nvectors == DEV_NVECTORS_UNSPECIFIED) {
+        vpci_dev->nvectors = 2 * MAX(net->nic_conf.peers.queues, 1)
+            + 1 /* Config interrupt */
+            + 1 /* Control vq */;
+    }
+
+    virtio_net_set_netclient_name(&dev->vdev, qdev->id,
+                                  object_get_typename(OBJECT(qdev)));
+
+    PCIDevice *pci_dev = &vpci_dev->pci_dev;
+    pcie_ari_init(pci_dev, VIRTIO_NET_CAP_ARI_OFFSET);
+
+    qdev_realize(vdev, BUS(&vpci_dev->bus), errp);
+}
+
+/*
 static void virtio_net_pci_vf_qdev_reset_hold(Object *obj)
 {
     //PCIDevice *vf = PCI_DEVICE(obj);
     //igb_vf_reset(pcie_sriov_get_pf(vf), pcie_sriov_vf_number(vf));
 }
+*/
 
 static void virtio_net_pci_instance_init(Object *obj)
 {
