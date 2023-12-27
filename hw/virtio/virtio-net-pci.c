@@ -36,6 +36,10 @@ typedef struct VirtIONetPCI VirtIONetPCI;
 DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI,
                          TYPE_VIRTIO_NET_PCI)
 
+#define TYPE_VIRTIO_NET_PCI_VF "virtio-net-pci-vf-base"
+DECLARE_INSTANCE_CHECKER(VirtIONetPCI, VIRTIO_NET_PCI_VF,
+                         TYPE_VIRTIO_NET_PCI_VF)
+
 struct VirtIONetPCI {
     VirtIOPCIProxy parent_obj;
     VirtIONet vdev;
@@ -128,7 +132,7 @@ static const VirtioPCIDeviceTypeInfo virtio_net_pci_info = {
 };
 
 static const VirtioPCIDeviceTypeInfo virtio_net_pci_vf_info = {
-    .base_name             = TYPE_VIRTIO_NET_PCI,
+    .base_name             = TYPE_VIRTIO_NET_PCI_VF,
     .generic_name          = "virtio-net-pci-vf",
     .transitional_name     = "virtio-net-pci-vf-transitional",
     .non_transitional_name = "virtio-net-pci-vf-non-transitional",
