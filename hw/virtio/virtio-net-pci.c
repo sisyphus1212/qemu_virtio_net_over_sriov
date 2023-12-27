@@ -65,9 +65,6 @@ static void virtio_net_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
     virtio_net_set_netclient_name(&dev->vdev, qdev->id,
                                   object_get_typename(OBJECT(qdev)));
 
-    PCIDevice *pci_dev = &vpci_dev->pci_dev;
-    pcie_ari_init(pci_dev, VIRTIO_NET_CAP_ARI_OFFSET);
-
     qdev_realize(vdev, BUS(&vpci_dev->bus), errp);
 }
 
